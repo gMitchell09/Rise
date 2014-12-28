@@ -1,0 +1,22 @@
+﻿Build started 1/3/2014 1:54:28 PM.
+     1>Project "C:\Users\RISE.RISE-PC\Documents\Visual Studio 2010\Projects\Urg_Helper\urg_library-1.1.2\vs2010\cpp\urg_cpp\urg_cpp.vcxproj" on node 3 (rebuild target(s)).
+     1>_PrepareForClean:
+         Deleting file "Release\urg_cpp.lastbuildstate".
+       InitializeBuildStatus:
+         Creating "Release\urg_cpp.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\..\..\include\cpp /I..\..\..\include\c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\..\src\ticks.cpp ..\..\..\src\Urg_driver.cpp
+         ticks.cpp
+         Urg_driver.cpp
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"C:\Users\RISE.RISE-PC\Documents\Visual Studio 2010\Projects\Urg_Helper\urg_library-1.1.2\vs2010\cpp\Release\urg_cpp.lib" urg.lib /LIBPATH:"C:\Users\RISE.RISE-PC\Documents\Visual Studio 2010\Projects\Urg_Helper\urg_library-1.1.2\vs2010\cpp\Release\\" /NOLOGO /LTCG Release\ticks.obj
+         Release\Urg_driver.obj
+         urg_cpp.vcxproj -> C:\Users\RISE.RISE-PC\Documents\Visual Studio 2010\Projects\Urg_Helper\urg_library-1.1.2\vs2010\cpp\Release\urg_cpp.lib
+       FinalizeBuildStatus:
+         Deleting file "Release\urg_cpp.unsuccessfulbuild".
+         Touching "Release\urg_cpp.lastbuildstate".
+     1>Done Building Project "C:\Users\RISE.RISE-PC\Documents\Visual Studio 2010\Projects\Urg_Helper\urg_library-1.1.2\vs2010\cpp\urg_cpp\urg_cpp.vcxproj" (rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:03.45

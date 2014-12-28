@@ -1,0 +1,34 @@
+﻿Build started 12/17/2013 4:50:17 PM.
+     1>Project "C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\sync_time_stamp\sync_time_stamp.vcxproj" on node 4 (rebuild target(s)).
+     1>_PrepareForClean:
+         Deleting file "Debug\sync_time_stamp.lastbuildstate".
+       InitializeBuildStatus:
+         Creating "Debug\sync_time_stamp.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\..\..\include\cpp /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\..\samples\cpp\Connection_information.cpp ..\..\..\samples\cpp\sync_time_stamp.cpp
+         sync_time_stamp.cpp
+         Connection_information.cpp
+         Generating Code...
+       ManifestResourceCompile:
+         c:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\sync_time_stamp.exe.embed.manifest.res" Debug\sync_time_stamp_manifest.rc 
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\Debug\sync_time_stamp.exe" /INCREMENTAL /NOLOGO /LIBPATH:../Debug urg_cpp.lib ws2_32.lib setupapi.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\sync_time_stamp.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\Debug\sync_time_stamp.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\Debug\sync_time_stamp.lib" /MACHINE:X86 Debug\sync_time_stamp.exe.embed.manifest.res
+         Debug\Connection_information.obj
+         Debug\sync_time_stamp.obj
+       Manifest:
+         Deleting file "Debug\sync_time_stamp.exe.embed.manifest".
+         c:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"Debug\sync_time_stamp.exe.embed.manifest" /manifest Debug\sync_time_stamp.exe.intermediate.manifest
+         c:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\sync_time_stamp.exe.embed.manifest.res" Debug\sync_time_stamp_manifest.rc 
+       LinkEmbedManifest:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\Debug\sync_time_stamp.exe" /INCREMENTAL /NOLOGO /LIBPATH:../Debug urg_cpp.lib ws2_32.lib setupapi.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\sync_time_stamp.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\Debug\sync_time_stamp.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\Debug\sync_time_stamp.lib" /MACHINE:X86 Debug\sync_time_stamp.exe.embed.manifest.res
+         Debug\Connection_information.obj
+         Debug\sync_time_stamp.obj
+         sync_time_stamp.vcxproj -> C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\Debug\sync_time_stamp.exe
+       FinalizeBuildStatus:
+         Deleting file "Debug\sync_time_stamp.unsuccessfulbuild".
+         Touching "Debug\sync_time_stamp.lastbuildstate".
+     1>Done Building Project "C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\sync_time_stamp\sync_time_stamp.vcxproj" (rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:07.05

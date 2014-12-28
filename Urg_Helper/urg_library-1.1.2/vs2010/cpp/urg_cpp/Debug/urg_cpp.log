@@ -1,0 +1,21 @@
+﻿Build started 12/17/2013 4:51:38 PM.
+     1>Project "C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\urg_cpp\urg_cpp.vcxproj" on node 3 (rebuild target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\urg_cpp.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\..\..\include\cpp /I..\..\..\include\c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\..\src\ticks.cpp ..\..\..\src\Urg_driver.cpp
+         Urg_driver.cpp
+         ticks.cpp
+         Generating Code...
+       Lib:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\Debug\urg_cpp.lib" urg.lib /LIBPATH:"C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\Debug\\" /NOLOGO Debug\ticks.obj
+         Debug\Urg_driver.obj
+         urg_cpp.vcxproj -> C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\Debug\urg_cpp.lib
+       FinalizeBuildStatus:
+         Deleting file "Debug\urg_cpp.unsuccessfulbuild".
+         Touching "Debug\urg_cpp.lastbuildstate".
+     1>Done Building Project "C:\Users\RISE.RISE-PC\Documents\ProjectRise\urg_library-1.1.2\urg_library-1.1.2\vs2010\cpp\urg_cpp\urg_cpp.vcxproj" (rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.83
