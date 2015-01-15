@@ -1,9 +1,19 @@
 #include "Stdafx.h"
 #include "SerialClass.h"
 
-Serial::Serial(char *portName)
+Serial::Serial(const char *portName)
 {
-    //We're not yet connected
+    _init(portName);
+}
+
+Serial::Serial(std::string portName)
+{
+	_init(portName.c_str());
+}
+
+void Serial::_init(const char *portName)
+{
+	//We're not yet connected
     this->connected = false;
 
     //Try to connect to the given port throuh CreateFile
@@ -63,7 +73,6 @@ Serial::Serial(char *portName)
              }
         }
     }
-
 }
 
 Serial::~Serial()

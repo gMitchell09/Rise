@@ -5,6 +5,7 @@
 #define ARDUINO_WAIT_TIME 2000
 
 #include "Stdafx.h"
+#include <string>
 
 class Serial
 {
@@ -18,9 +19,12 @@ class Serial
         //Keep track of last error
         DWORD errors;
 
+		void _init(const char *portName);
+
     public:
         //Initialize Serial communication with the given COM port
-        Serial(char *portName);
+        Serial(const char *portName);
+		Serial(std::string portName);
         //Close the connection
         //NOTA: for some reason you can't connect again before exiting
         //the program and running it again
