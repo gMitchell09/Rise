@@ -15,7 +15,7 @@
 namespace Urg_Helper
 {
 	//Contructor that intiates both a the pointcloud and the drvier for the lidar
-	Urg_Helper::Urg_Helper()
+	Urg_Helper::Urg_Helper() : _imuThread(NULL)
 	{
 		Urg_Helper::cloud = new pcl::PointCloud <pcl::PointXYZ>();
 		Urg_Helper::urg = new qrk::Urg_driver();
@@ -23,9 +23,14 @@ namespace Urg_Helper
 	//Decontructor that deletes the cloud closes the Lidar connection and deletes the object
 	Urg_Helper::~Urg_Helper()
 	{
-		delete Urg_Helper::cloud;
+		delete cloud;
 		Urg_Helper::urg->close();
-		delete Urg_Helper::urg;
+		delete urg;
+
+		if (_imuThread != NULL && _imuThread->joinable())
+			_imuThread->join();
+
+		delete _imu;
 	}
 	//This function takes each point input and cnoverts it into a 3D point. using the scanNo from the URG a radius and the phi angle
 	pcl::PointXYZ* Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, bool degrees)
@@ -46,6 +51,7 @@ namespace Urg_Helper
 		temp->z = static_cast<float>(radius * cos(theta));
 		return temp;
 	}
+
 	//This method connects to the urg and arduino please update each port for the connection
 	bool Urg_Helper::ConnectToUrg()
 	{
@@ -58,23 +64,43 @@ namespace Urg_Helper
 		//Goes from 0 to 1080 wich is -135 degrees to +135
 		urg->set_scanning_parameter(0, 1080, 0);
 		//This port is for the arduino. Leave in the backslashes and periods.
-		_serial = new Serial("\\\\.\\COM19"); //Arduino port.
-		if(!_serial->IsConnected())
+		try
+		{
+			_imu = new Common::IMU("\\\\.\\COM19");
+			urg->start_measurement(qrk::Urg_driver::Distance);
+			Sleep(2000);
+		}
+		catch (...)
+		{
 			return false;
+		}
 		return true;
 	}
-	// This function takes the input of char array and splits it into a list of strings if seperated by a space
-	std::vector<std::string> splitIntoParts(char theString[])
+
+	void Urg_Helper::GetScanFromUrg()
 	{
-		std::string temp(theString);
-		std::vector <std::string> stringList;
-		std::stringstream test(temp);
-		std::string segment;
-		while(std::getline(test, segment, ' '))
+		std::vector<long> data;
+		long timestamp;
+		if (!urg->get_distance(data, &timestamp))
 		{
-			stringList.push_back(segment);
+			Sleep(20);
 		}
-		return stringList;
+		Common::Quaternion qt = _imu->findTimestamp(timestamp);
+		if (qt.Q0 == -1 && qt.Q1 == -1 && qt.Q2 == -1 && qt.Q3 == -1) return;
+		double rotation = qt.yaw();
+
+		/*angle = time_stamp/1000.0 * 360;*/
+		for (int i = 0; i < data.size(); i++)
+		{
+			pcl::PointXYZ *tempPoint = CreatePoint(i, data[i], rotation, false);
+			cloud->push_back(*tempPoint);
+			delete tempPoint;
+		}
+	}
+
+	void Urg_Helper::spawnIMUThread()
+	{
+		_imuThread = _imu->make_thread();
 	}
 
 	List<long> ^ Urg_Helper::GetDataFromTheUrg(double numberofScans)

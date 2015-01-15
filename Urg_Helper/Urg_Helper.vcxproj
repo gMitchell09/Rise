@@ -91,6 +91,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="IMU.h" />
     <ClInclude Include="Point_Common.h" />
     <ClInclude Include="Quaternion_Common.h" />
     <ClInclude Include="resource.h" />
@@ -100,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="IMU.cpp" />
     <ClCompile Include="Point_Common.cpp" />
     <ClCompile Include="Quaternion_Common.cpp" />
     <ClCompile Include="SerialClass.cpp" />

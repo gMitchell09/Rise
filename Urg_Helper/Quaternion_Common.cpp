@@ -3,7 +3,11 @@
 
 namespace Common
 {
-	Quaternion::Quaternion(){}
+	Quaternion::Quaternion()
+	{
+		Q0 = Q1 = Q2 = Q3 = -1;
+	}
+
 	Quaternion::Quaternion(PointXYZ p)
 	{
 		Q0 = p.x;
@@ -15,5 +19,17 @@ namespace Common
 	PointXYZ Quaternion::GetPoint() const
 	{
 		return PointXYZ(Q0, Q1, Q2);
+	}
+
+	double Quaternion::yaw()
+	{
+		Q1 = 0;
+		Q3 = 0;
+		double mag = sqrt(Q0 * Q0 + Q2 * Q2);
+		Q0 /= mag;
+		Q2 /= mag;
+		double angle = 2 * acos(Q2);
+
+		return angle;
 	}
 }

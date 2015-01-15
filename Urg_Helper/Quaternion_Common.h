@@ -16,6 +16,8 @@ namespace Common
 
 		PointXYZ GetPoint() const;
 
+		double yaw();
+
 	};
 }
 #endif

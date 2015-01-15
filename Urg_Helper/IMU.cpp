@@ -1,6 +1,12 @@
 #include "Stdafx.h"
 #include "IMU.h"
 #include "SerialClass.h"
+#include <boost/bind.hpp>
+
+// FUCK YOU VISUAL STUDIO AND FUCK YOU MICROSOFT AND boost is ok.
+namespace boost {
+	struct thread::dummy {};
+}
 
 namespace Common
 {
@@ -21,6 +27,7 @@ namespace Common
 		if (!_isSendingQuatData)
 		{
 			_imuSerial->WriteData("1", 1);
+			_isSendingQuatData = true;
 		}
 
 		while (_imuSerial->Pop() != '~') 
@@ -48,7 +55,9 @@ namespace Common
 		qt.q = q;
 		qt.timestamp = imu_time;
 
-		_positionHistory.push(imu_time);
+		_queueLock.lock();
+		_positionHistory.push(qt);
+		_queueLock.unlock();
 	}
 
 	long IMU::getTimeStamp()
@@ -85,7 +94,11 @@ namespace Common
 
 		do
 		{
-			qt = _positionHistory.pop();
+			_queueLock.lock();
+			qt = _positionHistory.front();
+			_positionHistory.pop();
+			_queueLock.unlock();
+
 			isValid = (abs(qt.timestamp - timestamp) > tolerance);
 		}
 		while (qt.timestamp < timestamp + tolerance &&
@@ -93,5 +106,15 @@ namespace Common
 
 		if (isValid) return qt.q;
 		else return Quaternion();
+	}
+
+	boost::thread* IMU::make_thread()
+	{
+		return new boost::thread(boost::bind(&IMU::readQuaternion, this));
+	}
+
+	IMU::~IMU()
+	{
+		delete _imuSerial;
 	}
 }
