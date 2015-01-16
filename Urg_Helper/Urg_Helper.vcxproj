@@ -72,12 +72,14 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
+      <DisableSpecificWarnings>C4996;C4793;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>vtkCommon.lib;vtksys.lib;urg_cpp.lib;urg.lib;ws2_32.lib;pcl_visualization_release.lib;pcl_common_release.lib;pcl_apps_release.lib;setupapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ForceFileOutput>
       </ForceFileOutput>
+      <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -92,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IMU.h" />
+    <ClInclude Include="ManagedUrgHelper.h" />
     <ClInclude Include="Point_Common.h" />
     <ClInclude Include="Quaternion_Common.h" />
     <ClInclude Include="resource.h" />
@@ -102,6 +105,7 @@
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="IMU.cpp" />
+    <ClCompile Include="ManagedUrgHelper.cpp" />
     <ClCompile Include="Point_Common.cpp" />
     <ClCompile Include="Quaternion_Common.cpp" />
     <ClCompile Include="SerialClass.cpp" />
