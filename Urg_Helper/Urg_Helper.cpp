@@ -9,12 +9,17 @@
 #include "Quaternion_Common.h"
 #include "Point_Common.h"
 
+#include <thread>
+#include <mutex>
+#include <string>
+
 #define LIDAR_IMU_TIME_THRESHOLD 100
 #define ABS(x) ((x < 0) ? (-x) : (x))
 
 //Contructor that intiates both a the pointcloud and the drvier for the lidar
 Urg_Helper::Urg_Helper() : _imuThread(NULL)
 {
+	_updateMutex = new std::mutex();
 	Urg_Helper::cloud = new pcl::PointCloud <pcl::PointXYZ>();
 	Urg_Helper::urg = new qrk::Urg_driver();
 }
@@ -64,7 +69,7 @@ bool Urg_Helper::ConnectToUrg()
 	//This port is for the arduino. Leave in the backslashes and periods.
 	try
 	{
-		_imu = new Common::IMU("\\\\.\\COM19");
+		_imu = new Common::IMU(std::wstring(L"\\\\.\\COM19"));
 		urg->start_measurement(qrk::Urg_driver::Distance);
 		Sleep(2000);
 	}
@@ -95,9 +100,9 @@ void Urg_Helper::GetScanFromUrg()
 		delete tempPoint;
 	}
 
-	_updateMutex.lock();
+	_updateMutex->lock();
 	_updateCloud = true;
-	_updateMutex.unlock();
+	_updateMutex->unlock();
 }
 
 void Urg_Helper::spawnIMUThread()

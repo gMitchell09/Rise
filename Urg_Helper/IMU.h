@@ -4,8 +4,12 @@
 #include "Point_Common.h"
 #include <queue>
 #include <string>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread.hpp>
+
+namespace std 
+{
+	class thread;
+	class mutex;
+}
 
 class Serial;
 namespace Common
@@ -22,7 +26,7 @@ namespace Common
 	class IMU
 	{
 	public:
-		IMU(std::string imuPath);
+		IMU(std::wstring imuPath);
 
 		// thread-safe via boost::lockfree::queue
 		void readQuaternion();
@@ -32,7 +36,7 @@ namespace Common
 		bool isHistoryEmpty();
 		Quaternion findTimestamp(long timeStamp, long tolerance = 10);
 
-		boost::thread* make_thread();
+		std::thread* make_thread();
 
 		~IMU();
 	
@@ -40,7 +44,7 @@ namespace Common
 	private:
 		Serial* _imuSerial;
 		std::queue<Quaternion_Time> _positionHistory;
-		boost::mutex _queueLock;
+		std::mutex *_queueLock;
 		bool _isSendingQuatData;
 	};
 }

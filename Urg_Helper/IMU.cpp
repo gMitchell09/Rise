@@ -1,17 +1,15 @@
 #include "Stdafx.h"
 #include "IMU.h"
 #include "SerialClass.h"
-#include <boost/bind.hpp>
 
-// FUCK YOU VISUAL STUDIO AND FUCK YOU MICROSOFT AND boost is ok.
-namespace boost {
-	struct thread::dummy {};
-}
+#include <thread>
+#include <mutex>
 
 namespace Common
 {
-	IMU::IMU(std::string imuPath) : _isSendingQuatData(false)
+	IMU::IMU(std::wstring imuPath) : _isSendingQuatData(false)
 	{
+		_queueLock = new std::mutex();
 		_imuSerial = new Serial(imuPath.c_str());
 		if (!_imuSerial->IsConnected())
 			throw "Could not connect to arduino";
@@ -55,9 +53,9 @@ namespace Common
 		qt.q = q;
 		qt.timestamp = imu_time;
 
-		_queueLock.lock();
+		_queueLock->lock();
 		_positionHistory.push(qt);
-		_queueLock.unlock();
+		_queueLock->unlock();
 	}
 
 	long IMU::getTimeStamp()
@@ -94,10 +92,10 @@ namespace Common
 
 		do
 		{
-			_queueLock.lock();
+			_queueLock->lock();
 			qt = _positionHistory.front();
 			_positionHistory.pop();
-			_queueLock.unlock();
+			_queueLock->unlock();
 
 			isValid = (abs(qt.timestamp - timestamp) > tolerance);
 		}
@@ -108,9 +106,9 @@ namespace Common
 		else return Quaternion();
 	}
 
-	boost::thread* IMU::make_thread()
+	std::thread* IMU::make_thread()
 	{
-		return new boost::thread(boost::bind(&IMU::readQuaternion, this));
+		return new std::thread(std::bind(&IMU::readQuaternion, this));
 	}
 
 	IMU::~IMU()

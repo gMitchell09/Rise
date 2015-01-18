@@ -5,21 +5,11 @@
 #include "SerialClass.h"
 #include "IMU.h"
 
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
-
-//using namespace System;
-//using namespace System::Collections::Generic;
-//using namespace System::IO::Ports;
-//using namespace System::Threading;
-
-
-public class Urg_Helper
+class Urg_Helper
 {
 public:
 	// TODO: Add your methods for this class here.
 	bool ConnectToUrg();
-	//List<long> ^ GetDataFromTheUrg(double numberofScans);
 	void GetScanFromUrg();
 	void spawnIMUThread();
 
@@ -34,10 +24,10 @@ private:
 
 	Common::IMU *_imu;
 	Serial *_serial;
-	boost::thread *_imuThread;
+	std::thread *_imuThread;
 
 	double CalculatePhiAngle(int step);
 
 	bool _updateCloud;
-	boost::mutex _updateMutex;
+	std::mutex* _updateMutex;
 };

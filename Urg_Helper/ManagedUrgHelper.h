@@ -1,5 +1,6 @@
 #pragma once
 
+#using <System.dll>
 class Urg_Helper;
 
 namespace ManagedUrgHelper {
