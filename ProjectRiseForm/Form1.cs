@@ -16,16 +16,14 @@ namespace ProjectRiseForm
 
         public Form1()
         {
+            helper = new ManagedUrgHelper.ManagedUrgHelper();
             InitializeComponent();           
         }
 
         private void ConnectButton_Click(object sender, EventArgs e)
         {
-            helper = new ManagedUrgHelper.ManagedUrgHelper();
             if (!helper.ConnectToUrg())
                 MessageBox.Show("Unable to connect Check com");
-
-
         }
 
         private void getDataButton_Click(object sender, EventArgs e)

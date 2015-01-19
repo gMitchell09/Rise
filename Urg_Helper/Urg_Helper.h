@@ -4,6 +4,8 @@
 #include "Stdafx.h"
 #include "SerialClass.h"
 #include "IMU.h"
+#include <pcl/visualization/pcl_visualizer.h>
+#include <memory> // for std::unique_ptr
 
 class Urg_Helper
 {
@@ -14,6 +16,8 @@ public:
 	void spawnIMUThread();
 
 	bool StartCloudVisualization();
+	bool StartPCLVisualizer();
+
 	Urg_Helper();
 	~Urg_Helper();
 
@@ -30,4 +34,6 @@ private:
 
 	bool _updateCloud;
 	std::mutex* _updateMutex;
+
+	std::unique_ptr<pcl::visualization::PCLVisualizer> _visualizer;
 };
