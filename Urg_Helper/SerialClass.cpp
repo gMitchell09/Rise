@@ -1,17 +1,17 @@
 #include "Stdafx.h"
 #include "SerialClass.h"
 
-Serial::Serial(LPCWSTR portName)
+Serial::Serial(LPCSTR portName)
 {
     _init(portName);
 }
 
-Serial::Serial(std::wstring portName)
+Serial::Serial(std::string portName)
 {
-	_init((LPCWSTR)portName.c_str());
+	_init((LPCSTR)portName.c_str());
 }
 
-void Serial::_init(LPCWSTR portName)
+void Serial::_init(LPCSTR portName)
 {
 	//We're not yet connected
     this->connected = false;

@@ -83,7 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Urg_Helper\Urg_Helper.vcxproj">
-      <Project>{30E9E812-020E-4F7F-AA3B-14753150B92E}</Project>
+      <Project>{30e9e812-020e-4f7f-aa3b-14753150b92e}</Project>
       <Name>Urg_Helper</Name>
     </ProjectReference>
   </ItemGroup>

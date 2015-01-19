@@ -7,7 +7,7 @@
 
 namespace Common
 {
-	IMU::IMU(std::wstring imuPath) : _isSendingQuatData(false)
+	IMU::IMU(std::string imuPath) : _isSendingQuatData(false)
 	{
 		_queueLock = new std::mutex();
 		_imuSerial = new Serial(imuPath.c_str());

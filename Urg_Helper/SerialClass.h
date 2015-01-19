@@ -19,12 +19,12 @@ class Serial
         //Keep track of last error
         DWORD errors;
 
-		void _init(LPCWSTR portName);
+		void _init(LPCSTR portName);
 
     public:
         //Initialize Serial communication with the given COM port
-        Serial(LPCWSTR portName);
-		Serial(std::wstring portName);
+        Serial(LPCSTR portName);
+		Serial(std::string portName);
         //Close the connection
         //NOTA: for some reason you can't connect again before exiting
         //the program and running it again

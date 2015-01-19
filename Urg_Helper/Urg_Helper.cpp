@@ -69,7 +69,7 @@ bool Urg_Helper::ConnectToUrg()
 	//This port is for the arduino. Leave in the backslashes and periods.
 	try
 	{
-		_imu = new Common::IMU(std::wstring(L"\\\\.\\COM19"));
+		_imu = new Common::IMU(std::string("\\\\.\\COM19"));
 		urg->start_measurement(qrk::Urg_driver::Distance);
 		Sleep(2000);
 	}
@@ -109,92 +109,6 @@ void Urg_Helper::spawnIMUThread()
 {
 	_imuThread = _imu->make_thread();
 }
-
-//List<long> ^ Urg_Helper::GetDataFromTheUrg(double numberofScans)
-//{
-//	std::vector<long> data;						//recieves the angle data directly from LiDar
-//	std::vector<std::string> anglesReceived;    //Stores the step measurement from the arduino
-
-//	List<long> ^copy = gcnew List<long>();		// This is returned to the Form and can be used for debugging
-//	
-//	char receivedAngle[3000];					// Character array receieved from the Arduino				
-//	char receivedTime[1024];
-
-//	double phi_Angle[200];						// Array that stores the actual angle calculated for each step
-//	long time_stamp = 0;
-
-//	_serial->WriteData("T", 1);
-//	Sleep(50);
-//	while (_serial->Pop() != 'T');
-//	int read_d = _serial->ReadData(receivedTime, 100);
-//	receivedTime[read_d] = '\0';
-//	urg->set_sensor_time_stamp(atol(receivedTime));
-
-//	//Begin measurement for both Lidar and then Arduino
-//	urg->start_measurement(qrk::Urg_driver::Distance, numberofScans, 0);
-//	_serial->WriteData("1", 1);
-//	// Sleeps for 10 seconds to wait for URG and especially arduino to finish its measurements
-//	Sleep(2000);
-//	//Gets step data from the arudino
-//	//_serial->ReadData(receivedAngle, 3000);
-
-//	pcl::PointXYZ *tempPoint;					// Point passed to the point cloud for temporary storage
-//	//This loops for the number of scans to collect each piece of data
-//	for(int j =0; j < numberofScans; j++)
-//	{
-//		Common::Quaternion q;
-//		bool validIMU = false;
-//		long imu_time = 0;
-//		if (!urg->get_distance(data, &time_stamp)) {		// Gets the data from the URG
-//			return copy;									// if failes doesnt return any data
-//		}
-
-//		while (ABS(time_stamp - imu_time) > LIDAR_IMU_TIME_THRESHOLD 
-//			&& imu_time < time_stamp + LIDAR_IMU_TIME_THRESHOLD)
-//		{
-//			while (_serial->Pop() != '~') Sleep(3);
-//			int bytesRead = _serial->ReadToChar(receivedTime, 'D', 1024);
-//			if (bytesRead <= 0) continue;
-//			receivedTime[bytesRead] = '\0';
-//			imu_time = atol(receivedTime);
-//			if (imu_time == 0) continue;
-//			bytesRead = _serial->ReadToChar(receivedTime, 'E', 1024);
-//			
-//			if (bytesRead < 16)
-//			{
-//				continue;
-//			}
-//			q.Q0 = ((float*)receivedTime)[0];
-//			q.Q1 = ((float*)receivedTime)[1];
-//			q.Q2 = ((float*)receivedTime)[2];
-//			q.Q3 = ((float*)receivedTime)[3];
-
-//			validIMU = true;
-//		}
-
-//		if (!validIMU)
-//		{
-//			std::cout << "Skipping data" << std::endl;
-//			continue;
-//		}
-
-//		for (int i = 0; i < data.size(); i++)
-//		{
-//			q.Q1 = 0;
-//			q.Q3 = 0;
-//			double mag = sqrt(q.Q0 * q.Q0 + q.Q2 * q.Q2);
-//			q.Q0 /= mag;
-//			q.Q2 /= mag;
-//			double angle = 2 * acos(q.Q2);
-//			/*angle = time_stamp/1000.0 * 360;*/
-//			tempPoint = CreatePoint(i, data[i], angle, false);
-//			cloud->push_back(*tempPoint);
-//			delete tempPoint;
-//		}
-//	}
-//	
-//	return copy;
-//}
 
 //Calcutes the phi angle from the step passed by the arduino
 double Urg_Helper::CalculatePhiAngle(int step)

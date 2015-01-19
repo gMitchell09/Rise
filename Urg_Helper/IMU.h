@@ -26,7 +26,7 @@ namespace Common
 	class IMU
 	{
 	public:
-		IMU(std::wstring imuPath);
+		IMU(std::string imuPath);
 
 		// thread-safe via boost::lockfree::queue
 		void readQuaternion();

@@ -1,6 +1,4 @@
-#include "StdAfx.h"
 #include "ManagedUrgHelper.h"
-#include "Urg_Helper.h"
 
 namespace ManagedUrgHelper
 {
@@ -11,7 +9,7 @@ namespace ManagedUrgHelper
 
 	ManagedUrgHelper::~ManagedUrgHelper()
 	{
-		if (_unUrg_Helper != NULL)
+		if (_unUrg_Helper != 0)
 			delete _unUrg_Helper;
 	}
 
