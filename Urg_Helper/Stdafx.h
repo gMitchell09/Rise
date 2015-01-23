@@ -3,6 +3,7 @@
 // but are changed infrequently
 
 #pragma once
+#pragma unmanaged
 
 #include <math.h>
 

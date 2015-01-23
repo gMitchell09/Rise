@@ -4,6 +4,10 @@
 //					It then gets the data from both and attempts to combine them into a 3D point cloud which is stored in a point cloud library point cloud
 //
 
+// Updated by:		George Mitchell
+// Changelog:		Completely cleaned-up code and dependencies, very little original code remains.
+//						History is viewable from github: github.com/gMitchell09/Rise
+
 #include "stdafx.h"
 #include "Urg_Helper.h"
 #include "Quaternion_Common.h"
@@ -147,8 +151,6 @@ bool Urg_Helper::StartCloudVisualization()
 bool Urg_Helper::StartPCLVisualizer()
 {
 	/* Remove when doing the real-deal(tm) */
-	  pcl::PointCloud<pcl::PointXYZ>::Ptr basic_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
-	  pcl::PointCloud<pcl::PointXYZRGB>::Ptr point_cloud_ptr (new pcl::PointCloud<pcl::PointXYZRGB>);
 	  std::cout << "Genarating example point clouds.\n\n";
 	  // We're going to make an ellipse extruded along the z-axis. The colour for
 	  // the XYZRGB cloud will gradually go from red to green to blue.
@@ -161,16 +163,7 @@ bool Urg_Helper::StartPCLVisualizer()
 			basic_point.x = 0.5 * cosf (pcl::deg2rad(angle));
 			basic_point.y = sinf (pcl::deg2rad(angle));
 			basic_point.z = z;
-			basic_cloud_ptr->points.push_back(basic_point);
-
-			pcl::PointXYZRGB point;
-			point.x = basic_point.x;
-			point.y = basic_point.y;
-			point.z = basic_point.z;
-			uint32_t rgb = (static_cast<uint32_t>(r) << 16 |
-					static_cast<uint32_t>(g) << 8 | static_cast<uint32_t>(b));
-			point.rgb = *reinterpret_cast<float*>(&rgb);
-			point_cloud_ptr->points.push_back (point);
+			cloud->push_back(basic_point);
 		}
 		if (z < 0.0)
 		{
@@ -183,15 +176,13 @@ bool Urg_Helper::StartPCLVisualizer()
 			b += 12;
 		}
 	  }
-	  basic_cloud_ptr->width = (int) basic_cloud_ptr->points.size ();
-	  basic_cloud_ptr->height = 1;
-	  point_cloud_ptr->width = (int) point_cloud_ptr->points.size ();
-	  point_cloud_ptr->height = 1;
+	  cloud->width = (int) cloud->size();
+	  cloud->height = 1;
 
 	  /* end */
 
 	_visualizer->setBackgroundColor(0.0, 0.0, 0.0);
-	_visualizer->addPointCloud<pcl::PointXYZ> (basic_cloud_ptr, "input cloud");
+	_visualizer->addPointCloud<pcl::PointXYZ> (pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
 	_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "input cloud");
 	_visualizer->addCoordinateSystem(1.0);
 	_visualizer->initCameraParameters();
@@ -203,4 +194,17 @@ bool Urg_Helper::StartPCLVisualizer()
 	}
 
 	return true;
+}
+
+bool Urg_Helper::ExportPointCloud(std::string filename, std::unique_ptr<pcl::FileWriter> fw)
+{
+	return false;
+	//cloud->clear();
+	//return fw->write(filename, pcl::PCLPointCloud2::ConstPtr(cloud)) > 0;
+}
+
+bool Urg_Helper::ImportPointCloud(std::string filename, std::unique_ptr<pcl::FileReader> fr)
+{
+	return false;
+	//return fr->read(filename, *cloud) > 0;
 }

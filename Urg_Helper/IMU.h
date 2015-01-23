@@ -4,12 +4,8 @@
 #include "Point_Common.h"
 #include <queue>
 #include <string>
-
-namespace std 
-{
-	class thread;
-	class mutex;
-}
+#include <thread>
+#include <mutex>
 
 class Serial;
 namespace Common
