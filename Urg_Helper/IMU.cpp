@@ -28,6 +28,7 @@ namespace Common
 			_isSendingQuatData = true;
 		}
 
+		// clean off buffer
 		while (_imuSerial->Pop() != '~') 
 		{
 			if (timeout < 0) return;
@@ -41,6 +42,8 @@ namespace Common
 		receivedTime[bytesRead] = '\0';
 		imu_time = atol(receivedTime);
 		if (imu_time == 0) return;
+
+		bytesRead = _imuSerial->ReadToChar(receivedTime, 'E', 1024);
 
 		if (bytesRead < 16) return; // discard partial reads
 
