@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Urg_Helper", "Urg_Helper\Urg_Helper.vcxproj", "{30E9E812-020E-4F7F-AA3B-14753150B92E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "urg_cpp", "urg_library-1.1.8\vs2010\cpp\urg_cpp\urg_cpp.vcxproj", "{CB95510D-4DFC-4735-9454-F13DFBADBAE6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "urg", "urg_library-1.1.8\vs2010\c\urg\urg.vcxproj", "{269630A6-5F78-484F-A729-5CD301B5CABA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{30E9E812-020E-4F7F-AA3B-14753150B92E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{30E9E812-020E-4F7F-AA3B-14753150B92E}.Debug|Win32.Build.0 = Debug|Win32
+		{30E9E812-020E-4F7F-AA3B-14753150B92E}.Release|Win32.ActiveCfg = Release|Win32
+		{30E9E812-020E-4F7F-AA3B-14753150B92E}.Release|Win32.Build.0 = Release|Win32
+		{CB95510D-4DFC-4735-9454-F13DFBADBAE6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CB95510D-4DFC-4735-9454-F13DFBADBAE6}.Debug|Win32.Build.0 = Debug|Win32
+		{CB95510D-4DFC-4735-9454-F13DFBADBAE6}.Release|Win32.ActiveCfg = Release|Win32
+		{CB95510D-4DFC-4735-9454-F13DFBADBAE6}.Release|Win32.Build.0 = Release|Win32
+		{269630A6-5F78-484F-A729-5CD301B5CABA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{269630A6-5F78-484F-A729-5CD301B5CABA}.Debug|Win32.Build.0 = Debug|Win32
+		{269630A6-5F78-484F-A729-5CD301B5CABA}.Release|Win32.ActiveCfg = Release|Win32
+		{269630A6-5F78-484F-A729-5CD301B5CABA}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
