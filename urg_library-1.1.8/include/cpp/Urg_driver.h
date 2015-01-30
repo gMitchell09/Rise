@@ -14,6 +14,8 @@
 #include <string>
 #include "Lidar.h"
 
+#define MOCKABLE virtual
+
 namespace qrk
 {
     //! URG ドライバ
@@ -34,9 +36,9 @@ namespace qrk
                                                    is_urg_ports);
         const char* what(void) const;
 
-        bool open(const char* device_name, long baudrate = Default_baudrate,
+        MOCKABLE bool open(const char* device_name, long baudrate = Default_baudrate,
                   connection_type_t type = Serial);
-        void close(void);
+        MOCKABLE void close(void);
         bool is_open(void) const;
 
         void set_timeout_msec(int msec);
@@ -51,12 +53,12 @@ namespace qrk
         bool is_stable(void);
 
         // !!! データ取得の開始
-        bool start_measurement(measurement_type_t type = Distance,
+        MOCKABLE bool start_measurement(measurement_type_t type = Distance,
                                int scan_times = Infinity_times,
                                int skip_scan = 0);
 
         // !!! 受信データの受け取り
-        bool get_distance(std::vector<long>& data, long *time_stamp = NULL);
+        MOCKABLE bool get_distance(std::vector<long>& data, long *time_stamp = NULL);
         bool get_distance_intensity(std::vector<long>& data,
                                     std::vector<unsigned short>& intensity,
                                     long *time_stamp = NULL);
@@ -76,11 +78,11 @@ namespace qrk
         void stop_measurement(void);
 
         //! タイムスタンプの同期
-        bool set_sensor_time_stamp(long time_stamp);
+        MOCKABLE bool set_sensor_time_stamp(long time_stamp);
 
         //! 角度変換
-        double index2rad(int index) const;
-        double index2deg(int index) const;
+        MOCKABLE double index2rad(int index) const;
+        MOCKABLE double index2deg(int index) const;
         int rad2index(double radian) const;
         int deg2index(double degree) const;
         int rad2step(double radian) const;
