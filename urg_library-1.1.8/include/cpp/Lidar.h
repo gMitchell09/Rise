@@ -30,6 +30,7 @@ namespace qrk
         typedef enum {
             Serial,
             Ethernet,
+			File,
         } connection_type_t;
 
         virtual ~Lidar(void)

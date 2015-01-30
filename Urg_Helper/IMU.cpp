@@ -7,10 +7,10 @@
 
 namespace Common
 {
-	IMU::IMU(std::string imuPath) : _isSendingQuatData(false)
+	IMU::IMU(Serial *serial) : _isSendingQuatData(false)
 	{
 		_queueLock = new std::mutex();
-		_imuSerial = new Serial(imuPath.c_str());
+		_imuSerial = serial;
 		if (!_imuSerial->IsConnected())
 			throw "Could not connect to arduino";
 	}

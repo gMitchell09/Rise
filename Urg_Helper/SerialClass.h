@@ -9,7 +9,7 @@
 
 class Serial
 {
-    private:
+    protected:
         //Serial comm handler
         HANDLE hSerial;
         //Connection status
@@ -19,7 +19,7 @@ class Serial
         //Keep track of last error
         DWORD errors;
 
-		void _init(LPCSTR portName);
+		MOCKABLE void _init(LPCSTR portName);
 
     public:
         //Initialize Serial communication with the given COM port

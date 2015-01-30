@@ -32,6 +32,7 @@ enum {
 typedef enum {
     URG_SERIAL,                 //!< シリアル, USB 接続
     URG_ETHERNET,               //!< イーサーネット接続
+	URG_FILE,
 } urg_connection_type_t;
 
 

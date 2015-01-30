@@ -18,6 +18,8 @@
 #include <ctime>
 #include <cstdio>
 
+#define MOCKABLE virtual
+
 namespace boost { 
     namespace detail { 
         namespace win32 { 

@@ -25,6 +25,8 @@ int connection_open(urg_connection_t *connection,
         return tcpclient_open(&connection->tcpclient,
                               device, baudrate_or_port);
         break;
+	case URG_FILE:
+		break;
     }
     return -1;
 }
@@ -40,6 +42,9 @@ void connection_close(urg_connection_t *connection)
     case URG_ETHERNET:
         tcpclient_close(&connection->tcpclient);
         break;
+
+	case URG_FILE:
+		break;
     }
 }
 
@@ -56,6 +61,10 @@ int connection_set_baudrate(urg_connection_t *connection, long baudrate)
     case URG_ETHERNET:
         ret = 0;
         break;
+
+	case URG_FILE:
+		ret = 0;
+		break;
     }
 
     return ret;
@@ -72,6 +81,9 @@ int connection_write(urg_connection_t *connection,
     case URG_ETHERNET:
         return tcpclient_write(&connection->tcpclient, data, size);
         break;
+
+	case URG_FILE:
+		break;
     }
     return -1;
 }
@@ -87,6 +99,9 @@ int connection_read(urg_connection_t *connection,
     case URG_ETHERNET:
         return tcpclient_read(&connection->tcpclient, data, max_size, timeout);
         break;
+
+	case URG_FILE:
+		break;
     }
     return -1;
 }
@@ -103,6 +118,9 @@ int connection_readline(urg_connection_t *connection,
         return tcpclient_readline(&connection->tcpclient,
                                   data, max_size, timeout);
         break;
+
+	case URG_FILE:
+		break;
     }
     return -1;
 }

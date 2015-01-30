@@ -37,7 +37,25 @@ void Serial::_init(LPCSTR portName)
         }
         else
         {
-            printf("ERROR!!!");
+			DWORD retSize;
+			LPTSTR pTmp = NULL;
+
+			retSize = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+									FORMAT_MESSAGE_FROM_SYSTEM |
+									FORMAT_MESSAGE_ARGUMENT_ARRAY,
+									NULL,
+									GetLastError(),
+									LANG_NEUTRAL,
+									(LPTSTR)&pTmp,
+									0,
+									NULL);
+			if (!retSize || pTmp == NULL) {}
+			else
+			{
+				pTmp[strlen(pTmp) - 2] = '\0';
+				printf("ERROR: %d: %s", GetLastError(), pTmp);
+				LocalFree((HLOCAL)pTmp);
+			}
         }
     }
     else

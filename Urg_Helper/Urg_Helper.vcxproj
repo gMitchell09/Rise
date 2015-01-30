@@ -83,16 +83,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FakeUrg.h" />
     <ClInclude Include="IMU.h" />
     <ClInclude Include="Point_Common.h" />
     <ClInclude Include="Quaternion_Common.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SerialClass.h" />
+    <ClInclude Include="SerialClass.Mock.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="Urg_Helper.h" />
+    <ClInclude Include="Urg_Helper.Mock.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="FakeUrg.cpp" />
     <ClCompile Include="IMU.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -110,10 +114,12 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="SerialClass.Mock.cpp" />
     <ClCompile Include="Urg_Helper.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="Urg_Helper.Mock.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.ico" />

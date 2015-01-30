@@ -14,9 +14,9 @@
 class Urg_Helper
 {
 public:
-	// TODO: Add your methods for this class here.
-	bool ConnectToUrg();
-	void GetScanFromUrg();
+	MOCKABLE bool ConnectToUrg();
+	MOCKABLE void GetScanFromUrg();
+
 	void spawnIMUThread();
 
 	bool StartCloudVisualization();
@@ -27,13 +27,12 @@ public:
 	Urg_Helper();
 	~Urg_Helper();
 
-private:
+protected:
 	pcl::PointCloud <pcl::PointXYZ> *cloud;
 	pcl::PointXYZ *CreatePoint(int ScanNo, int radius, float angle, bool degrees);
 	qrk::Urg_driver *urg;
 
 	Common::IMU *_imu;
-	Serial *_serial;
 	std::thread *_imuThread;
 
 	double CalculatePhiAngle(int step);

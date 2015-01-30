@@ -97,9 +97,21 @@ bool Urg_driver::open(const char* device_name, long baudrate,
     pimpl->firmware_version_.clear();
     pimpl->serial_id_.clear();
 
-    urg_connection_type_t connection_type =
-        (type == Ethernet) ? URG_ETHERNET : URG_SERIAL;
-    int ret = urg_open(&pimpl->urg_, connection_type, device_name, baudrate);
+	urg_connection_type_t connection_type;
+	switch (type)
+	{
+	case Ethernet:
+		connection_type = URG_ETHERNET;
+		break;
+	case Serial:
+		connection_type = URG_SERIAL;
+		break;
+	case File:
+		connection_type = URG_FILE;
+		break;
+	}
+
+	int ret = urg_open(&pimpl->urg_, connection_type, device_name, baudrate);
     if (ret < 0) {
         return false;
     }

@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Mockup Classes">
+      <UniqueIdentifier>{c1371dee-2755-4063-81b6-dac9e7fab897}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Mockup Classes">
+      <UniqueIdentifier>{a3a6982e-45c2-4e43-8a7e-c0e49a0e704b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Urg_Helper.h">
@@ -36,6 +42,15 @@
     <ClInclude Include="IMU.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SerialClass.Mock.h">
+      <Filter>Header Files\Mockup Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Urg_Helper.Mock.h">
+      <Filter>Header Files\Mockup Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="FakeUrg.h">
+      <Filter>Header Files\Mockup Classes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -58,6 +73,15 @@
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SerialClass.Mock.cpp">
+      <Filter>Source Files\Mockup Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="Urg_Helper.Mock.cpp">
+      <Filter>Source Files\Mockup Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="FakeUrg.cpp">
+      <Filter>Source Files\Mockup Classes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

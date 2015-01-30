@@ -22,9 +22,9 @@ namespace Common
 	class IMU
 	{
 	public:
-		IMU(std::string imuPath);
+		IMU(Serial *serial);
 
-		// thread-safe via boost::lockfree::queue
+		// thread-safe via mutex
 		void readQuaternion();
 		long getTimeStamp();
 

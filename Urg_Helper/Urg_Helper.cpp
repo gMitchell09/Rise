@@ -28,14 +28,17 @@ Urg_Helper::Urg_Helper() :
 	_visualizer(new pcl::visualization::PCLVisualizer("Cloud"))
 {
 	_updateMutex = new std::mutex();
-	Urg_Helper::cloud = new pcl::PointCloud <pcl::PointXYZ>();
-	Urg_Helper::urg = new qrk::Urg_driver();
+	this->cloud = new pcl::PointCloud <pcl::PointXYZ>();
+	this->urg = new qrk::Urg_driver();
 }
 //Decontructor that deletes the cloud closes the Lidar connection and deletes the object
 Urg_Helper::~Urg_Helper()
 {
+	_visualizer->removeAllPointClouds();
+	_visualizer->close();
+
 	delete cloud;
-	Urg_Helper::urg->close();
+	this->urg->close();
 	delete urg;
 
 	if (_imuThread != NULL && _imuThread->joinable())
@@ -77,7 +80,8 @@ bool Urg_Helper::ConnectToUrg()
 	//This port is for the arduino. Leave in the backslashes and periods.
 	try
 	{
-		_imu = new Common::IMU(std::string("\\\\.\\COM19"));
+		Serial *s = new Serial(std::string("\\\\.\\COM19"));
+		_imu = new Common::IMU(s);
 		this->spawnIMUThread();
 
 		urg->start_measurement(qrk::Urg_driver::Distance);
