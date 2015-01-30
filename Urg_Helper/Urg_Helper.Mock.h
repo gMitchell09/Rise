@@ -14,5 +14,4 @@ public:
 	MOCKABLE bool ConnectToUrg() override;
 	MOCKABLE void GetScanFromUrg() override;
 
-	FakeUrg *fakeUrg;
 };
