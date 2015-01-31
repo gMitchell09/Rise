@@ -5,6 +5,8 @@ from mathutils import Vector
 from math import sqrt, pi
 from time import sleep, time
 from array import array
+import sys
+import os
 
 # line drawing stuffs
 import bgl, blf
@@ -59,6 +61,10 @@ def ScanOnce(object, mesh):
             
     return distData
 
+def getFaceAngles(mesh):
+    angleData = [face.normal for face in mesh.polygons]          
+    return angleData
+
 def rotateLidar(object, angle):
     ori = object.rotation_euler
     ori.z += angle
@@ -66,8 +72,21 @@ def rotateLidar(object, angle):
     object.rotation_euler = ori
     #object.location.x += 0.001
     
+    object.select = True
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
     #bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+    
+def correctLidarRotation(lidar, ref):
+    print("Correcting rotation")
+
+    ori = ref.rotation_euler.copy()
+    print("Ori: ", ori)
+    ori.z = -ori.z
+    print("Inv: ", ori)
+
+    lidar.rotation_euler = ori
+    lidar.select = True
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
 
 def oglWrapper(func):
     def func_wrapper():
@@ -87,12 +106,14 @@ def createUniqueFile(name, ext):
     failedFiles = 0
     success = 0
     outFile = 0
+    curPath = bpy.path.abspath("//")
     while (1):
         try:
-            outFile = open(name + str(failedFiles) + ext, "x+b")
+            outFile = open(curPath + name + str(failedFiles) + ext, "x+b")
             break
         except:
             failedFiles += 1
+            print ("Error: ", sys.exc_info()[0])
             continue
     return outFile
 
@@ -101,12 +122,16 @@ current_milli_time = lambda: int(round(time() * 1000))
 @oglWrapper
 def main():
     print ("-----------------------Start----------------------")
-    mesh = bpy.data.meshes['Lidar_Scan_Mesh.002']
+    mesh = bpy.data.meshes['Lidar_Scan_Mesh']
     object = bpy.data.objects['Lidar_Scan_Object']
     imuObj = bpy.data.objects['IMU_Object']
+    rotObj = bpy.data.objects['Lidar_Rotation_Tracker']
     
     imu_file = createUniqueFile("imu", ".txt")
     lidar_file = createUniqueFile("lidar", ".txt")
+    
+    print("Unique files created")
+    
     imu_file_string = bytes()
     lidar_file_string = ""
     
@@ -145,6 +170,10 @@ def main():
         #print("Time: ", timestamp)
         #print ("Q: ", imuObj.matrix_world.to_quaternion())
         
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+    sleep(5)
+    correctLidarRotation(object, rotObj)
+    
     print ("")
     print ("")
     
