@@ -2,7 +2,7 @@ import bpy
 import mathutils
 from bpy.types import Window, Object
 from mathutils import Vector
-from math import sqrt, pi
+from math import sqrt, pi, atan2
 from time import sleep, time
 from array import array
 import sys
@@ -62,7 +62,7 @@ def ScanOnce(object, mesh):
     return distData
 
 def getFaceAngles(mesh):
-    angleData = [face.normal for face in mesh.polygons]          
+    angleData = [atan2(face.normal.z, face.normal.y) for face in mesh.polygons]
     return angleData
 
 def rotateLidar(object, angle):
@@ -171,11 +171,16 @@ def main():
         #print ("Q: ", imuObj.matrix_world.to_quaternion())
         
     bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
-    sleep(5)
+    sleep(1)
     correctLidarRotation(object, rotObj)
     
     print ("")
     print ("")
+    
+    angleData = getFaceAngles(mesh)
+    angleArray = array('f', angleData)
+    lidar_file.write(angleArray)
+    lidar_file.write(bytes('\x00\x00\x00\x00', 'UTF-8'))
     
     lidar_file.write(bytes(lidar_file_string, 'UTF-8'))
     imu_file.write(imu_file_string)
