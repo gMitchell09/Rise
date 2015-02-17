@@ -1,6 +1,8 @@
 #include "Stdafx.h"
 #include "SerialClass.h"
 
+Serial::Serial() {}
+
 Serial::Serial(LPCSTR portName)
 {
     _init(portName);

@@ -68,10 +68,31 @@ bool FakeUrg::start_measurement(measurement_type_t,
 }
 
 // pop next distance measurement from list
-bool FakeUrg::get_distance(std::vector<long, std::allocator<long>> &data, long *timestamp) { return false; }
+bool FakeUrg::get_distance(std::vector<long, std::allocator<long>> &data, long *timestamp) 
+{
+	if (_inFile.eof()) return false;
+	
+	_inFile >> *timestamp;
+	*timestamp += _timeStamp; // maintain our offset for whatever reason
+	long next;
 
-// do nothing.
-bool FakeUrg::set_sensor_time_stamp(long time_stamp) { return false; }
+	_inFile >> next;
+	while (next != 0 && !_inFile.eof())
+	{
+		data.push_back(next);
+		_inFile >> next;
+	}
+
+	if (_inFile.eof()) return false;
+
+	return true; 
+}
+
+bool FakeUrg::set_sensor_time_stamp(long time_stamp) 
+{
+	_timeStamp = time_stamp;
+	return true; 
+}
 
 // meh
 FakeUrg::FakeUrg() {}

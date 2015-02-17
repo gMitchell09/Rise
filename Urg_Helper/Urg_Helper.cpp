@@ -34,10 +34,10 @@ Urg_Helper::Urg_Helper() :
 //Decontructor that deletes the cloud closes the Lidar connection and deletes the object
 Urg_Helper::~Urg_Helper()
 {
-	_visualizer->removeAllPointClouds();
+	_visualizer->removePointCloud("input cloud");
 	_visualizer->close();
 
-	delete cloud;
+//	delete cloud;
 	this->urg->close();
 	delete urg;
 
@@ -195,6 +195,17 @@ bool Urg_Helper::StartPCLVisualizer()
 	{
 		_visualizer->spinOnce(100);
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		this->GetScanFromUrg();
+
+		{
+			_updateMutex->lock();
+			if (_updateCloud)
+			{
+				//_visualizer->updatePointCloud(pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
+				_updateCloud = false;
+			}
+			_updateMutex->unlock();
+		}
 	}
 
 	return true;

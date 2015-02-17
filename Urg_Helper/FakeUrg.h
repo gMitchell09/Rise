@@ -32,5 +32,7 @@ private:
 	std::vector<DataReading> _rangeData;
 	std::vector<float> _angleValues;
 	std::fstream _inFile;
+
+	int _timeStamp;
 };
 

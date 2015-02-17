@@ -16,8 +16,8 @@ protected:
 	virtual void _init(LPCSTR portName);
 
 public:
-	Serial_Mock (LPCSTR portName) : Serial (portName) {}
-	Serial_Mock (std::string portName) : Serial(portName) {}
+	Serial_Mock (LPCSTR portName) { _init(portName); }
+	Serial_Mock (std::string portName) { _init(portName.c_str()); }
 };
 
 #endif // SERIALCLASS_H_INCLUDED

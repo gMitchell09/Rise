@@ -23,6 +23,7 @@ class Serial
 
     public:
         //Initialize Serial communication with the given COM port
+		Serial();
         Serial(LPCSTR portName);
 		Serial(std::string portName);
         //Close the connection

@@ -156,7 +156,9 @@ def main():
         timestamp = current_milli_time() - startTime
         if (timestamp - time_of_last_lidar_read > time_between_lidar_readings):
             dist_data = ScanOnce(object, mesh)
-            lidar_file_string += '~' + str(timestamp) + 'D' + ','.join(str(x) for x in dist_data) + 'E'
+            longArray = array('L', [int(x) for x in dist_data])
+            lidar_file_string += timestamp.to_bytes(4, sys.byteorder) + longArray.tobytes() + b'\0\0\0\0'
+            #lidar_file_string += '~' + str(timestamp) + 'D' + ','.join(str(x) for x in dist_data) + 'E'
             time_of_last_lidar_read = timestamp
             
         if (timestamp - time_of_last_imu_read > time_between_imu_readings):
