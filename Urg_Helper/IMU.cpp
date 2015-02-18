@@ -7,59 +7,66 @@
 
 namespace Common
 {
-	IMU::IMU(Serial *serial) : _isSendingQuatData(false), imuThread(std::bind(&IMU::readQuaternion, this))
+	IMU::IMU(Serial *serial) : _isSendingQuatData(false), _running(true), 
+		_imuSerial(serial), _queueLock(new std::mutex()),
+		imuThread(std::bind(&IMU::readQuaternion, this))
 	{
-		_queueLock = new std::mutex();
-		_imuSerial = serial;
 		if (!_imuSerial->IsConnected())
 			throw "Could not connect to arduino";
 	}
 
+	void IMU::stopThread()
+	{
+		_running = false;
+	}
+
 	void IMU::readQuaternion()
 	{
-		std::cout << "FUCK YOU" << std::endl;
-		long timeout = 100;
-		char receivedTime[1024];
-		long imu_time;
-		Quaternion q;
-
-		if (!_isSendingQuatData)
+		while (_running)
 		{
-			_imuSerial->WriteData("1", 1);
-			_isSendingQuatData = true;
-		}
+			long timeout = 100;
+			char receivedTime[1024];
+			long imu_time;
+			Quaternion q;
 
-		// clean off buffer
-		while (_imuSerial->Pop() != '~') 
-		{
-			if (timeout < 0) return;
-			Sleep(3);
-			timeout -= 3;
-		}
+			if (!_isSendingQuatData)
+			{
+				_imuSerial->WriteData("1", 1);
+				_isSendingQuatData = true;
+			}
+
+			// clean off buffer
+			while (_imuSerial->Pop() != '~') 
+			{
+				if (timeout < 0) return;
+				Sleep(3);
+				timeout -= 3;
+			}
 
 		
-		int bytesRead = _imuSerial->ReadToChar(receivedTime, 'D', 1024);
-		if (bytesRead <= 0) return;
-		receivedTime[bytesRead] = '\0';
-		imu_time = atol(receivedTime);
-		if (imu_time == 0) return;
+			int bytesRead = _imuSerial->ReadToChar(receivedTime, 'D', 1024);
+			if (bytesRead <= 0) return;
+			receivedTime[bytesRead] = '\0';
+			imu_time = atol(receivedTime);
+			if (imu_time == 0) return;
 
-		bytesRead = _imuSerial->ReadToChar(receivedTime, 'E', 1024);
+			bytesRead = _imuSerial->ReadToChar(receivedTime, 'E', 1024);
 
-		if (bytesRead < 16) return; // discard partial reads
+			if (bytesRead < 16) return; // discard partial reads
 
-		q.Q0 = ((float*)receivedTime)[0];
-		q.Q1 = ((float*)receivedTime)[1];
-		q.Q2 = ((float*)receivedTime)[2];
-		q.Q3 = ((float*)receivedTime)[3];
+			q.Q0 = ((float*)receivedTime)[0];
+			q.Q1 = ((float*)receivedTime)[1];
+			q.Q2 = ((float*)receivedTime)[2];
+			q.Q3 = ((float*)receivedTime)[3];
 
-		Quaternion_Time qt;
-		qt.q = q;
-		qt.timestamp = imu_time;
+			Quaternion_Time qt;
+			qt.q = q;
+			qt.timestamp = imu_time;
 
-		_queueLock->lock();
-		_positionHistory.push(qt);
-		_queueLock->unlock();
+			_queueLock->lock();
+			_positionHistory.push(qt);
+			_queueLock->unlock();
+		}
 	}
 
 	long IMU::getTimeStamp()
@@ -116,6 +123,7 @@ namespace Common
 
 	IMU::~IMU()
 	{
+		this->stopThread();
 		if (imuThread.joinable())
 			imuThread.join();
 		delete _imuSerial;

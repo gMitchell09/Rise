@@ -32,7 +32,7 @@ namespace Common
 		bool isHistoryEmpty();
 		Quaternion findTimestamp(long timeStamp, long tolerance = 10);
 
-		std::thread imuThread;
+		void stopThread();
 
 		~IMU();
 	
@@ -42,6 +42,9 @@ namespace Common
 		std::queue<Quaternion_Time> _positionHistory;
 		std::mutex *_queueLock;
 		bool _isSendingQuatData;
+		bool _running;
+		std::thread imuThread;
+
 	};
 }
 #endif

@@ -15,10 +15,10 @@ bool Urg_Helper_Mock::ConnectToUrg()
 	std::cout << "Connecting to URG" << std::endl;
 	try
 	{
-		Serial_Mock *s = new Serial_Mock(std::string("C:\\Users\\GW\\Documents\\GitHub\\Rise\\Simulation\\imu7.txt"));
+		Serial_Mock *s = new Serial_Mock(std::string("C:\\Users\\George\\Documents\\GitHub\\Rise\\Simulation\\imu7.txt"));
 		_imu = new Common::IMU(s);
-
-		if (!urg->open("C:\\Users\\GW\\Documents\\GitHub\\Rise\\Simulation\\lidar7.txt"))
+		Sleep(1000); // sleep for 1s so IMU data can be processed...
+		if (!urg->open("C:\\Users\\George\\Documents\\GitHub\\Rise\\Simulation\\lidar7.txt"))
 		{
 			std::cout << "Could not open fake urg file" << std::endl;
 			return false;
