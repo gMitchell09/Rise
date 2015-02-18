@@ -36,23 +36,24 @@ namespace Common
 			}
 
 			// clean off buffer
-			while (_imuSerial->Pop() != '~') 
+			while (_imuSerial->Pop() != '~' && timeout >= 0) 
 			{
-				if (timeout < 0) return;
 				Sleep(3);
 				timeout -= 3;
 			}
 
+			if (timeout < 0) continue;
+
 		
 			int bytesRead = _imuSerial->ReadToChar(receivedTime, 'D', 1024);
-			if (bytesRead <= 0) return;
+			if (bytesRead <= 0) continue;
 			receivedTime[bytesRead] = '\0';
 			imu_time = atol(receivedTime);
-			if (imu_time == 0) return;
+			if (imu_time == 0) continue;
 
 			bytesRead = _imuSerial->ReadToChar(receivedTime, 'E', 1024);
 
-			if (bytesRead < 16) return; // discard partial reads
+			if (bytesRead < 16) continue; // discard partial reads
 
 			q.Q0 = ((float*)receivedTime)[0];
 			q.Q1 = ((float*)receivedTime)[1];
