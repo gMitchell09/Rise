@@ -32,7 +32,7 @@ namespace Common
 		bool isHistoryEmpty();
 		Quaternion findTimestamp(long timeStamp, long tolerance = 10);
 
-		std::thread* make_thread();
+		std::thread imuThread;
 
 		~IMU();
 	

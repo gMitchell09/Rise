@@ -15,9 +15,7 @@ class Urg_Helper
 {
 public:
 	MOCKABLE bool ConnectToUrg();
-	MOCKABLE void GetScanFromUrg();
-
-	void spawnIMUThread();
+	MOCKABLE bool GetScanFromUrg();
 
 	bool StartCloudVisualization();
 	bool StartPCLVisualizer();
@@ -29,7 +27,7 @@ public:
 
 protected:
 	pcl::PointCloud <pcl::PointXYZ> *cloud;
-	pcl::PointXYZ *CreatePoint(int ScanNo, int radius, float angle, bool degrees);
+	pcl::PointXYZ CreatePoint(int ScanNo, int radius, float angle, bool degrees);
 	qrk::Urg_driver *urg;
 
 	Common::IMU *_imu;

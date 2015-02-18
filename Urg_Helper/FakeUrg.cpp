@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <iterator>
 
+#include <iostream>
+#include <cassert>
+
 namespace
 {
 	template <typename T> // T models Any
@@ -34,27 +37,28 @@ bool FakeUrg::open(const char* device_name,
 				   long baudrate,
                    connection_type_t type) 
 {
-	_inFile.open(device_name, std::fstream::in);
+	_inFile.open(device_name, std::ios::in | std::ios::binary);
+	assert (_inFile.good());
 
-	char endOfAngles[4] = {0, 0, 0, 0};
-	auto it = std::search(
-		std::istreambuf_iterator<char> (_inFile.rdbuf()), 
-		std::istreambuf_iterator<char> (), 
-		endOfAngles, 
-		endOfAngles + 4);
+	int nAngles = 1080;
+	_angleValues.resize(nAngles);
 
-	if (it != std::istreambuf_iterator<char> ())
+	for (int i = 0; i < nAngles; ++i)
 	{
-		int nElem = (_inFile.tellg())/sizeof(float);
-		_inFile.seekg(0, std::ios_base::beg);
+		float angle = 0.0f;
+		_inFile.read(reinterpret_cast<char*>(&angle), sizeof(angle));
+		assert (_inFile.good());
 
-		_angleValues.resize(nElem);
-
-		std::transform(std::istreambuf_iterator<char> (_inFile.rdbuf()),
-			it,
-			_angleValues.begin(),
-			static_cast_func<float>());
+		_angleValues.push_back(angle);
+		
 	}
+
+	int32_t shouldBeZero;
+	_inFile.read(reinterpret_cast<char*>(&shouldBeZero), sizeof(shouldBeZero));
+
+	assert(shouldBeZero == 0);
+
+	//std::transform(std::istreambuf_iterator<char> (_inFile.rdbuf()), std::istreambuf_iterator<char> (_inFile.rdbuf()) + 4320, _angleValues.begin(), static_cast_func<float>());
 
 	return true;
 }
@@ -71,16 +75,20 @@ bool FakeUrg::start_measurement(measurement_type_t,
 bool FakeUrg::get_distance(std::vector<long, std::allocator<long>> &data, long *timestamp) 
 {
 	if (_inFile.eof()) return false;
-	
-	_inFile >> *timestamp;
-	*timestamp += _timeStamp; // maintain our offset for whatever reason
+	long ts = -1;
+	_inFile.read(reinterpret_cast<char*>(&ts), sizeof(long));
+	assert (_inFile.good());
+
+	*timestamp = ts + _timeStamp; // maintain our offset for whatever reason
 	long next;
 
-	_inFile >> next;
+	_inFile.read(reinterpret_cast<char*>(&next), sizeof(next));
+
 	while (next != 0 && !_inFile.eof())
 	{
-		data.push_back(next);
-		_inFile >> next;
+		data.push_back(next/10);
+		_inFile.read(reinterpret_cast<char*>(&next), sizeof(next));
+		assert (_inFile.good());
 	}
 
 	if (_inFile.eof()) return false;
@@ -95,7 +103,7 @@ bool FakeUrg::set_sensor_time_stamp(long time_stamp)
 }
 
 // meh
-FakeUrg::FakeUrg() {}
+FakeUrg::FakeUrg() : _timeStamp(0) {}
 
 // meh
 FakeUrg::~FakeUrg() {}

@@ -12,6 +12,6 @@ public:
 	~Urg_Helper_Mock();
 	
 	MOCKABLE bool ConnectToUrg() override;
-	MOCKABLE void GetScanFromUrg() override;
+	MOCKABLE bool GetScanFromUrg() override;
 
 };

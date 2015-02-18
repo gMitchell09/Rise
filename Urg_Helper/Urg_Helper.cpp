@@ -40,17 +40,13 @@ Urg_Helper::~Urg_Helper()
 //	delete cloud;
 	this->urg->close();
 	delete urg;
-
-	if (_imuThread != NULL && _imuThread->joinable())
-		_imuThread->join();
-
 	delete _imu;
 }
 //This function takes each point input and cnoverts it into a 3D point. using the scanNo from the URG a radius and the phi angle
-pcl::PointXYZ* Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, bool degrees)
+pcl::PointXYZ Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, bool degrees)
 {
 	//Creates a pcl point object to store the 3D data.
-	pcl::PointXYZ* temp = new pcl::PointXYZ();
+	pcl::PointXYZ temp;
 	// gets the theta angle from the urg function that converts the scan number into an angle in radians.
 	double theta = urg->index2rad(ScanNo);
 	//Converts degrees to radians
@@ -60,9 +56,9 @@ pcl::PointXYZ* Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, bool
 	else
 		realAngle = angle;
 	// These formaluas are taken directly from spherical coordinates calculations. 
-	temp->x = static_cast<float>(cos(realAngle) * sin(theta) * radius);
-	temp->y = static_cast<float>(sin(realAngle) * sin(theta) * radius);
-	temp->z = static_cast<float>(radius * cos(theta));
+	temp.x = static_cast<float>(cos(realAngle) * sin(theta) * radius);
+	temp.y = static_cast<float>(sin(realAngle) * sin(theta) * radius);
+	temp.z = static_cast<float>(radius * cos(theta));
 	return temp;
 }
 
@@ -82,7 +78,6 @@ bool Urg_Helper::ConnectToUrg()
 	{
 		Serial *s = new Serial(std::string("\\\\.\\COM19"));
 		_imu = new Common::IMU(s);
-		this->spawnIMUThread();
 
 		urg->start_measurement(qrk::Urg_driver::Distance);
 		Sleep(2000);
@@ -94,34 +89,30 @@ bool Urg_Helper::ConnectToUrg()
 	return true;
 }
 
-void Urg_Helper::GetScanFromUrg()
+bool Urg_Helper::GetScanFromUrg()
 {
 	std::vector<long> data;
 	long timestamp;
 	if (!urg->get_distance(data, &timestamp))
 	{
-		return;
+		return false;
 	}
 	Common::Quaternion qt = _imu->findTimestamp(timestamp);
-	if (qt.Q0 == -1 && qt.Q1 == -1 && qt.Q2 == -1 && qt.Q3 == -1) return;
+	if (qt.Q0 == -1 && qt.Q1 == -1 && qt.Q2 == -1 && qt.Q3 == -1) return false;
 	double rotation = qt.yaw();
 
 	/*angle = time_stamp/1000.0 * 360;*/
 	for (int i = 0; i < data.size(); i++)
 	{
-		pcl::PointXYZ *tempPoint = CreatePoint(i, data[i], rotation, false);
-		cloud->push_back(*tempPoint);
-		delete tempPoint;
+		pcl::PointXYZ tempPoint = CreatePoint(i, data[i], rotation, false);
+		cloud->push_back(tempPoint);
 	}
 
 	_updateMutex->lock();
 	_updateCloud = true;
 	_updateMutex->unlock();
-}
 
-void Urg_Helper::spawnIMUThread()
-{
-	_imuThread = _imu->make_thread();
+	return true;
 }
 
 //Calcutes the phi angle from the step passed by the arduino
@@ -158,7 +149,7 @@ bool Urg_Helper::StartPCLVisualizer()
 	  std::cout << "Genarating example point clouds.\n\n";
 	  // We're going to make an ellipse extruded along the z-axis. The colour for
 	  // the XYZRGB cloud will gradually go from red to green to blue.
-	  uint8_t r(255), g(15), b(15);
+	  /*uint8_t r(255), g(15), b(15);
 	  for (float z(-1.0); z <= 1.0; z += 0.05)
 	  {
 		for (float angle(0.0); angle <= 360.0; angle += 5.0)
@@ -181,9 +172,10 @@ bool Urg_Helper::StartPCLVisualizer()
 		}
 	  }
 	  cloud->width = (int) cloud->size();
-	  cloud->height = 1;
+	  cloud->height = 1;*/
 
 	  /* end */
+	while( this->GetScanFromUrg() );
 
 	_visualizer->setBackgroundColor(0.0, 0.0, 0.0);
 	_visualizer->addPointCloud<pcl::PointXYZ> (pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
@@ -195,7 +187,7 @@ bool Urg_Helper::StartPCLVisualizer()
 	{
 		_visualizer->spinOnce(100);
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		this->GetScanFromUrg();
+		//this->GetScanFromUrg();
 
 		{
 			_updateMutex->lock();

@@ -7,7 +7,7 @@
 
 namespace Common
 {
-	IMU::IMU(Serial *serial) : _isSendingQuatData(false)
+	IMU::IMU(Serial *serial) : _isSendingQuatData(false), imuThread(std::bind(&IMU::readQuaternion, this))
 	{
 		_queueLock = new std::mutex();
 		_imuSerial = serial;
@@ -17,6 +17,7 @@ namespace Common
 
 	void IMU::readQuaternion()
 	{
+		std::cout << "FUCK YOU" << std::endl;
 		long timeout = 100;
 		char receivedTime[1024];
 		long imu_time;
@@ -92,7 +93,10 @@ namespace Common
 	{
 		Quaternion_Time qt;
 		bool isValid = false;
-
+		if (_positionHistory.empty()) 
+		{
+			return Quaternion();
+		}
 		do
 		{
 			_queueLock->lock();
@@ -103,19 +107,17 @@ namespace Common
 			isValid = (abs(qt.timestamp - timestamp) > tolerance);
 		}
 		while (qt.timestamp < timestamp + tolerance &&
-			abs(qt.timestamp - timestamp) > tolerance);
+			abs(qt.timestamp - timestamp) > tolerance
+			&& !_positionHistory.empty());
 
 		if (isValid) return qt.q;
 		else return Quaternion();
 	}
 
-	std::thread* IMU::make_thread()
-	{
-		return new std::thread(std::bind(&IMU::readQuaternion, this));
-	}
-
 	IMU::~IMU()
 	{
+		if (imuThread.joinable())
+			imuThread.join();
 		delete _imuSerial;
 	}
 }

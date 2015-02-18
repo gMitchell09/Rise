@@ -15,11 +15,10 @@ bool Urg_Helper_Mock::ConnectToUrg()
 	std::cout << "Connecting to URG" << std::endl;
 	try
 	{
-		Serial_Mock *s = new Serial_Mock(std::string("C:\\Users\\George\\Documents\\GitHub\\Rise\\Simulation\\imu7.txt"));
+		Serial_Mock *s = new Serial_Mock(std::string("C:\\Users\\GW\\Documents\\GitHub\\Rise\\Simulation\\imu7.txt"));
 		_imu = new Common::IMU(s);
-		this->spawnIMUThread();
 
-		if (!urg->open("C:\\Users\\George\\Documents\\GitHub\\Rise\\Simulation\\lidar7.txt"))
+		if (!urg->open("C:\\Users\\GW\\Documents\\GitHub\\Rise\\Simulation\\lidar7.txt"))
 		{
 			std::cout << "Could not open fake urg file" << std::endl;
 			return false;
@@ -33,28 +32,31 @@ bool Urg_Helper_Mock::ConnectToUrg()
 	return true;
 }
 
-void Urg_Helper_Mock::GetScanFromUrg()
+bool Urg_Helper_Mock::GetScanFromUrg()
 {
 	std::cout << "Scanning..." << std::endl;
 	std::vector<long> data;
 	long timestamp;
 	if (!urg->get_distance(data, &timestamp))
 	{
-		return;
+		return false;
 	}
 
 	Common::Quaternion qt = _imu->findTimestamp(timestamp);
-	if (qt.Q0 == -1 && qt.Q1 == -1 && qt.Q2 == -1 && qt.Q3 == -1) return;
+	std::cout << "Timestamp: " << timestamp << std::endl;
+	std::cout << "Quaternion: (" << qt.Q0 << ", " << qt.Q1 << ", " << qt.Q2 << ", " << qt.Q3 << ")" << std::endl;
+	if (qt.Q0 == -1 && qt.Q1 == -1 && qt.Q2 == -1 && qt.Q3 == -1) return false;
 	double rotation = qt.yaw();
 
 	for (int i = 0; i < data.size(); i++)
 	{
-		pcl::PointXYZ *tempPoint = CreatePoint(i, data[i], rotation, false);
-		cloud->push_back(*tempPoint);
-		delete tempPoint;
+		pcl::PointXYZ tempPoint = CreatePoint(i, data[i], rotation, false);
+		cloud->push_back(tempPoint);
 	}
 
 	_updateMutex->lock();
 	_updateCloud = true;
 	_updateMutex->unlock();
+
+	return true;
 }
