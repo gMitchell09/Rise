@@ -33,8 +33,6 @@ protected:
 	Common::IMU *_imu;
 	std::thread *_imuThread;
 
-	double CalculatePhiAngle(int step);
-
 	bool _updateCloud;
 	std::mutex* _updateMutex;
 

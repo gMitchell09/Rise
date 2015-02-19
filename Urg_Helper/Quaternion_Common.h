@@ -16,8 +16,9 @@ namespace Common
 
 		PointXYZ GetPoint() const;
 
+		double roll();
+		double pitch();
 		double yaw();
-
 	};
 }
 #endif

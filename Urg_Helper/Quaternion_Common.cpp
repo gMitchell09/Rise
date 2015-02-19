@@ -32,4 +32,14 @@ namespace Common
 
 		return angle;
 	}
+
+	double Quaternion::pitch()
+	{
+		return atan2(2 * Q0 * Q3 - 2 * Q1 * Q2, 1 - 2 * Q0 * Q0 - 2 * Q2 * Q2);
+	}
+
+	double Quaternion::roll()
+	{
+		return atan2(2 * Q1 * Q3 - 2 * Q0 * Q2, 1 - 2 * Q1 * Q1 - 2 * Q2 * Q2);
+	}
 }

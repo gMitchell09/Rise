@@ -49,7 +49,7 @@ bool FakeUrg::open(const char* device_name,
 		_inFile.read(reinterpret_cast<char*>(&angle), sizeof(angle));
 		assert (_inFile.good());
 
-		_angleValues.push_back(angle);
+		_angleValues[i] = angle;
 		
 	}
 
@@ -77,7 +77,7 @@ bool FakeUrg::get_distance(std::vector<long, std::allocator<long>> &data, long *
 	if (_inFile.eof()) return false;
 	long ts = -1;
 	_inFile.read(reinterpret_cast<char*>(&ts), sizeof(long));
-	assert (_inFile.good());
+	//assert (_inFile.good());
 
 	*timestamp = ts + _timeStamp; // maintain our offset for whatever reason
 	long next;
@@ -86,9 +86,9 @@ bool FakeUrg::get_distance(std::vector<long, std::allocator<long>> &data, long *
 
 	while (next != 0 && !_inFile.eof())
 	{
-		data.push_back(next/10);
+		data.push_back(next/100);
 		_inFile.read(reinterpret_cast<char*>(&next), sizeof(next));
-		assert (_inFile.good());
+		//assert (_inFile.good());
 	}
 
 	if (_inFile.eof()) return false;

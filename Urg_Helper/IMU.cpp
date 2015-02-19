@@ -112,7 +112,7 @@ namespace Common
 			_positionHistory.pop();
 			_queueLock->unlock();
 
-			isValid = (abs(qt.timestamp - timestamp) > tolerance);
+			isValid = (abs(qt.timestamp - timestamp) < tolerance);
 		}
 		while (qt.timestamp < timestamp + tolerance &&
 			abs(qt.timestamp - timestamp) > tolerance

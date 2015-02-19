@@ -43,8 +43,6 @@ bool Urg_Helper_Mock::GetScanFromUrg()
 	}
 
 	Common::Quaternion qt = _imu->findTimestamp(timestamp);
-	std::cout << "Timestamp: " << timestamp << std::endl;
-	std::cout << "Quaternion: (" << qt.Q0 << ", " << qt.Q1 << ", " << qt.Q2 << ", " << qt.Q3 << ")" << std::endl;
 	if (qt.Q0 == -1 && qt.Q1 == -1 && qt.Q2 == -1 && qt.Q3 == -1) return false;
 	double rotation = qt.yaw();
 

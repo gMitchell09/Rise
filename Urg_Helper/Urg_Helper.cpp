@@ -49,6 +49,7 @@ pcl::PointXYZ Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, bool 
 	pcl::PointXYZ temp;
 	// gets the theta angle from the urg function that converts the scan number into an angle in radians.
 	double theta = urg->index2rad(ScanNo);
+
 	//Converts degrees to radians
 	double realAngle;
 	if (degrees)
@@ -113,14 +114,6 @@ bool Urg_Helper::GetScanFromUrg()
 	_updateMutex->unlock();
 
 	return true;
-}
-
-//Calcutes the phi angle from the step passed by the arduino
-double Urg_Helper::CalculatePhiAngle(int step)
-{
-	// Since the total number of steps in a roation is 2048 divide by 2047 and multiply by 360 to get the angle
-	double phiAngle = (((double) step) / (double) 2047) * 360;
-	return phiAngle;
 }
 
 //This function starts the visualization from the point cloud library. Can be modified according to point cloud library
