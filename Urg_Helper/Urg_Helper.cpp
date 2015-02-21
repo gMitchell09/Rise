@@ -20,7 +20,6 @@
 #include <pcl/common/common_headers.h>
 #include <pcl/io/pcd_io.h>
 
-#define LIDAR_IMU_TIME_THRESHOLD 0
 #define ABS(x) ((x < 0) ? (-x) : (x))
 
 //Contructor that intiates both a the pointcloud and the drvier for the lidar
@@ -105,7 +104,7 @@ bool Urg_Helper::GetScanFromUrg()
 	{
 		return false;
 	}
-	Common::Quaternion qt = _imu->findTimestamp(timestamp, LIDAR_IMU_TIME_THRESHOLD);
+	Common::Quaternion qt = _imu->findTimestamp(timestamp);
 	if (qt.x == -1 && qt.y == -1 && qt.z == -1 && qt.w == -1) return false;
 	double rotation = qt.yaw();
 
@@ -147,38 +146,10 @@ bool Urg_Helper::StartPCLVisualizer()
 {
 	/* Remove when doing the real-deal(tm) */
 	  std::cout << "Genarating example point clouds.\n\n";
-	  // We're going to make an ellipse extruded along the z-axis. The colour for
-	  // the XYZRGB cloud will gradually go from red to green to blue.
-	  /*uint8_t r(255), g(15), b(15);
-	  for (float z(-1.0); z <= 1.0; z += 0.05)
-	  {
-		for (float angle(0.0); angle <= 360.0; angle += 5.0)
-		{
-			pcl::PointXYZ basic_point;
-			basic_point.x = 0.5 * cosf (pcl::deg2rad(angle));
-			basic_point.y = sinf (pcl::deg2rad(angle));
-			basic_point.z = z;
-			cloud->push_back(basic_point);
-		}
-		if (z < 0.0)
-		{
-			r -= 12;
-			g += 12;
-		}
-		else
-		{
-			g -= 12;
-			b += 12;
-		}
-	  }
-	  cloud->width = (int) cloud->size();
-	  cloud->height = 1;*/
 
-	  /* end */
-	while( this->GetScanFromUrg() );
-
+	//while( this->GetScanFromUrg() );
+	this->GetScanFromUrg();
 	_visualizer->setBackgroundColor(0.0, 0.0, 0.0);
-	_visualizer->addPointCloud<pcl::PointXYZ> (pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
 	_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "input cloud");
 	_visualizer->addCoordinateSystem(1000.0);
 	_visualizer->initCameraParameters();
@@ -189,9 +160,14 @@ bool Urg_Helper::StartPCLVisualizer()
 	_visualizer->registerKeyboardCallback(f);
 	while (!_visualizer->wasStopped())
 	{
+		if (!_visualizer->updatePointCloud(pcl::PointCloud <pcl::PointXYZ>::ConstPtr(cloud), "input cloud"))
+		{
+			_visualizer->addPointCloud<pcl::PointXYZ> (pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
+		}
+
 		_visualizer->spinOnce(100);
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		//this->GetScanFromUrg();
+		this->GetScanFromUrg();
 
 		{
 			_updateMutex->lock();

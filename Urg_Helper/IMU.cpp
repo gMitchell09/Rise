@@ -97,7 +97,7 @@ namespace Common
 		return _positionHistory.empty();
 	}
 
-	Quaternion IMU::findTimestamp(long timestamp, long tolerance)
+	Quaternion IMU::findTimestamp(long timestamp)
 	{
 		Quaternion_Time qt_prev;
 		Quaternion_Time qt_post;
@@ -117,7 +117,6 @@ namespace Common
 			
 			if (_positionHistory.empty())
 			{
-				std::cout << "Ran out of shit early :'''(" << std::endl;
 				break;
 			}
 			
@@ -136,7 +135,7 @@ namespace Common
 		if (isValid) 
 		{
 			std::cout << "Slerp!" << std::endl;
-			return Quaternion(qt_prev.q, qt_post.q);
+			return Quaternion(qt_prev.q, qt_post.q, float(timestamp - qt_prev.timestamp) / float(qt_post.timestamp));
 		}
 		else return Quaternion();
 	}

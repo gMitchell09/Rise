@@ -30,7 +30,7 @@ namespace Common
 
 		// User-facing queue side
 		bool isHistoryEmpty();
-		Quaternion findTimestamp(long timeStamp, long tolerance = 25);
+		Quaternion findTimestamp(long timeStamp);
 
 		void stopThread();
 
