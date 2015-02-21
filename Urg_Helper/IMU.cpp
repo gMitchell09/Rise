@@ -55,10 +55,10 @@ namespace Common
 
 			if (bytesRead < 16) continue; // discard partial reads
 
-			q.Q0 = ((float*)receivedTime)[0];
-			q.Q1 = ((float*)receivedTime)[1];
-			q.Q2 = ((float*)receivedTime)[2];
-			q.Q3 = ((float*)receivedTime)[3];
+			q.x = ((float*)receivedTime)[0];
+			q.y = ((float*)receivedTime)[1];
+			q.z = ((float*)receivedTime)[2];
+			q.w = ((float*)receivedTime)[3];
 
 			Quaternion_Time qt;
 			qt.q = q;
@@ -99,8 +99,11 @@ namespace Common
 
 	Quaternion IMU::findTimestamp(long timestamp, long tolerance)
 	{
-		Quaternion_Time qt;
+		Quaternion_Time qt_prev;
+		Quaternion_Time qt_post;
+
 		bool isValid = false;
+		
 		if (_positionHistory.empty()) 
 		{
 			return Quaternion();
@@ -108,17 +111,33 @@ namespace Common
 		do
 		{
 			_queueLock->lock();
-			qt = _positionHistory.front();
+			qt_prev = _positionHistory.front();
+			if (qt_prev.timestamp > timestamp) break;
 			_positionHistory.pop();
+			
+			if (_positionHistory.empty())
+			{
+				std::cout << "Ran out of shit early :'''(" << std::endl;
+				break;
+			}
+			
+			qt_post = _positionHistory.front();
 			_queueLock->unlock();
-
-			isValid = (abs(qt.timestamp - timestamp) < tolerance);
+			
+			isValid = (qt_prev.timestamp <= timestamp && qt_post.timestamp >= timestamp);
 		}
-		while (qt.timestamp < timestamp + tolerance &&
-			abs(qt.timestamp - timestamp) > tolerance
-			&& !_positionHistory.empty());
+		while (qt_prev.timestamp < timestamp && !isValid && !_positionHistory.empty());
 
-		if (isValid) return qt.q;
+		if (!isValid)
+		{
+			std::cout << "Empty: " << _positionHistory.empty() << std::endl << "Prev: " << qt_prev.timestamp << " : " << "current: " << timestamp << " : post: " << qt_post.timestamp << std::endl;
+		}
+
+		if (isValid) 
+		{
+			std::cout << "Slerp!" << std::endl;
+			return Quaternion(qt_prev.q, qt_post.q);
+		}
 		else return Quaternion();
 	}
 

@@ -1,6 +1,8 @@
 #include "Urg_Helper.Mock.h"
 #include "SerialClass.Mock.h"
 
+#define LIDAR_IMU_TIME_THRESHOLD 50
+
 Urg_Helper_Mock::Urg_Helper_Mock()
 {
 	this->urg = new FakeUrg();
@@ -42,8 +44,8 @@ bool Urg_Helper_Mock::GetScanFromUrg()
 		return false;
 	}
 
-	Common::Quaternion qt = _imu->findTimestamp(timestamp);
-	if (qt.Q0 == -1 && qt.Q1 == -1 && qt.Q2 == -1 && qt.Q3 == -1) return false;
+	Common::Quaternion qt = _imu->findTimestamp(timestamp, LIDAR_IMU_TIME_THRESHOLD);
+	if (qt.x == -1 && qt.y == -1 && qt.z == -1 && qt.w == -1) return false;
 	double rotation = qt.yaw();
 
 	for (int i = 0; i < data.size(); i++)

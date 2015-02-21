@@ -20,7 +20,7 @@
 #include <pcl/common/common_headers.h>
 #include <pcl/io/pcd_io.h>
 
-#define LIDAR_IMU_TIME_THRESHOLD 100
+#define LIDAR_IMU_TIME_THRESHOLD 0
 #define ABS(x) ((x < 0) ? (-x) : (x))
 
 //Contructor that intiates both a the pointcloud and the drvier for the lidar
@@ -105,8 +105,8 @@ bool Urg_Helper::GetScanFromUrg()
 	{
 		return false;
 	}
-	Common::Quaternion qt = _imu->findTimestamp(timestamp);
-	if (qt.Q0 == -1 && qt.Q1 == -1 && qt.Q2 == -1 && qt.Q3 == -1) return false;
+	Common::Quaternion qt = _imu->findTimestamp(timestamp, LIDAR_IMU_TIME_THRESHOLD);
+	if (qt.x == -1 && qt.y == -1 && qt.z == -1 && qt.w == -1) return false;
 	double rotation = qt.yaw();
 
 	/*angle = time_stamp/1000.0 * 360;*/

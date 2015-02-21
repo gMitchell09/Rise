@@ -29,7 +29,7 @@ namespace Common
 	PointXYZ PointXYZ::Rotate(const Quaternion& quat)
 	{
 		PointXYZ u = quat.GetPoint();
-		float s = quat.Q3;
+		float s = quat.w;
 		PointXYZ value = 2.0f * u.dot(*this) * u
 			+ (s*s - u.dot(u)) * (*this)
 			+ 2.0f * s * u.Cross(*this);
