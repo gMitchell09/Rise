@@ -10,6 +10,5 @@ int main()
 	uhm.StartPCLVisualizer();
 	//uhm.StartCloudVisualization();
 
-	system("PAUSE");
 	return 0;
 }

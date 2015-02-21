@@ -86,7 +86,7 @@ bool FakeUrg::get_distance(std::vector<long, std::allocator<long>> &data, long *
 
 	while (next != 0 && !_inFile.eof())
 	{
-		data.push_back(next/100);
+		data.push_back(next);
 		_inFile.read(reinterpret_cast<char*>(&next), sizeof(next));
 		//assert (_inFile.good());
 	}

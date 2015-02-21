@@ -18,6 +18,7 @@
 #include <string>
 
 #include <pcl/common/common_headers.h>
+#include <pcl/io/pcd_io.h>
 
 #define LIDAR_IMU_TIME_THRESHOLD 100
 #define ABS(x) ((x < 0) ? (-x) : (x))
@@ -56,10 +57,16 @@ pcl::PointXYZ Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, bool 
 		realAngle = (double) (angle * 3.14159265359)/180;
 	else
 		realAngle = angle;
-	// These formaluas are taken directly from spherical coordinates calculations. 
-	temp.x = static_cast<float>(cos(realAngle) * sin(theta) * radius);
-	temp.y = static_cast<float>(sin(realAngle) * sin(theta) * radius);
-	temp.z = static_cast<float>(radius * cos(theta));
+
+	// These formaluas are taken directly from spherical coordinates calculations.
+	pcl::PointXYZ lidarCart;
+	lidarCart.x = 0;
+	lidarCart.y = static_cast<float>(cos(theta) * radius);
+	lidarCart.z = static_cast<float>(sin(theta) * radius);
+
+	temp.x = static_cast<float>(lidarCart.x * cos(realAngle) + lidarCart.y * sin(realAngle));
+	temp.y = static_cast<float>(-lidarCart.x * sin(realAngle) + lidarCart.y * cos(realAngle));
+	temp.z = static_cast<float>(lidarCart.z);
 	return temp;
 }
 
@@ -173,9 +180,13 @@ bool Urg_Helper::StartPCLVisualizer()
 	_visualizer->setBackgroundColor(0.0, 0.0, 0.0);
 	_visualizer->addPointCloud<pcl::PointXYZ> (pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
 	_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "input cloud");
-	_visualizer->addCoordinateSystem(1.0);
+	_visualizer->addCoordinateSystem(1000.0);
 	_visualizer->initCameraParameters();
 
+	boost::function <void(const pcl::visualization::KeyboardEvent&)> f =
+		boost::bind(&Urg_Helper::keyPress, this, _1);
+
+	_visualizer->registerKeyboardCallback(f);
 	while (!_visualizer->wasStopped())
 	{
 		_visualizer->spinOnce(100);
@@ -196,15 +207,26 @@ bool Urg_Helper::StartPCLVisualizer()
 	return true;
 }
 
+void Urg_Helper::keyPress (const pcl::visualization::KeyboardEvent &ev)
+{
+	std::cout << "Key: " << ev.getKeySym() << " : " << ev.getKeyCode() << std::endl;
+	std::cout << "Mod: " << ev.isAltPressed() << ", " << ev.isCtrlPressed() << ", " << ev.isShiftPressed() << std::endl;
+	if (ev.getKeyCode() == 's')
+	{
+		std::unique_ptr<pcl::FileWriter> fw (new pcl::PCDWriter());
+
+		this->ExportPointCloud("C:\\Users\\George\\Desktop\\Test.pcd", std::move(fw));
+		std::cout << "Saved!" << std::endl;
+	}
+}
+
 bool Urg_Helper::ExportPointCloud(std::string filename, std::unique_ptr<pcl::FileWriter> fw)
 {
-	return false;
-	//cloud->clear();
-	//return fw->write(filename, pcl::PCLPointCloud2::ConstPtr(cloud)) > 0;
+	//return false;
+	return fw->write(filename, *cloud) > 0;
 }
 
 bool Urg_Helper::ImportPointCloud(std::string filename, std::unique_ptr<pcl::FileReader> fr)
 {
-	return false;
-	//return fr->read(filename, *cloud) > 0;
+	return fr->read(filename, *cloud) > 0;
 }

@@ -133,7 +133,7 @@ def main():
     print("Unique files created")
     
     imu_file_string = bytes()
-    lidar_file_string = ""
+    lidar_file_string = bytes()
     
     timestamp = 0 # ticks in ms
     startTime = current_milli_time()
@@ -151,9 +151,11 @@ def main():
     #                = 18 d/iter
     #                = 0.15707963267948966192313216916398 rad/iter
     lidar_spin_speed = 0.01256637061435917295385057353312 # rad/ms
-    
+
     while (timestamp < 20000):
+        prev_timestamp = timestamp
         timestamp = current_milli_time() - startTime
+        
         if (timestamp - time_of_last_lidar_read > time_between_lidar_readings):
             dist_data = ScanOnce(object, mesh)
             longArray = array('L', [int(x) for x in dist_data])
@@ -167,7 +169,7 @@ def main():
             imu_file_string += bytes('~' + str(timestamp) + 'D', 'UTF-8') + floatArray.tobytes() + bytes('E', 'UTF-8')
             time_of_last_imu_read = timestamp
             
-        rotateLidar(object, lidar_spin_speed * timestamp)
+        rotateLidar(object, lidar_spin_speed * (timestamp - prev_timestamp))
             
         #print("Time: ", timestamp)
         #print ("Q: ", imuObj.matrix_world.to_quaternion())
@@ -184,7 +186,7 @@ def main():
     lidar_file.write(angleArray)
     lidar_file.write(bytes('\x00\x00\x00\x00', 'UTF-8'))
     
-    lidar_file.write(bytes(lidar_file_string, 'UTF-8'))
+    lidar_file.write(lidar_file_string)
     imu_file.write(imu_file_string)
     
     lidar_file.close()

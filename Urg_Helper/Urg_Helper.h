@@ -22,6 +22,8 @@ public:
 	bool ExportPointCloud(std::string filename, std::unique_ptr<pcl::FileWriter> fw);
 	bool ImportPointCloud(std::string filename, std::unique_ptr<pcl::FileReader> fr);
 
+	void keyPress (const pcl::visualization::KeyboardEvent &ev);
+
 	Urg_Helper();
 	~Urg_Helper();
 
