@@ -24,7 +24,6 @@
 
 //Contructor that intiates both a the pointcloud and the drvier for the lidar
 Urg_Helper::Urg_Helper() : 
-	_imuThread(NULL), 
 	_visualizer(new pcl::visualization::PCLVisualizer("Cloud"))
 {
 	_updateMutex = new std::mutex();
@@ -147,8 +146,14 @@ bool Urg_Helper::StartPCLVisualizer()
 	/* Remove when doing the real-deal(tm) */
 	  std::cout << "Genarating example point clouds.\n\n";
 
-	//while( this->GetScanFromUrg() );
-	this->GetScanFromUrg();
+	while( this->GetScanFromUrg() );
+	while( this->GetScanFromUrg() );
+	while( this->GetScanFromUrg() );
+	while( this->GetScanFromUrg() );
+	while( this->GetScanFromUrg() );
+	//this->GetScanFromUrg();
+
+	_visualizer->addPointCloud<pcl::PointXYZ> (pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
 	_visualizer->setBackgroundColor(0.0, 0.0, 0.0);
 	_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "input cloud");
 	_visualizer->addCoordinateSystem(1000.0);
@@ -160,14 +165,14 @@ bool Urg_Helper::StartPCLVisualizer()
 	_visualizer->registerKeyboardCallback(f);
 	while (!_visualizer->wasStopped())
 	{
-		if (!_visualizer->updatePointCloud(pcl::PointCloud <pcl::PointXYZ>::ConstPtr(cloud), "input cloud"))
-		{
-			_visualizer->addPointCloud<pcl::PointXYZ> (pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
-		}
+		//if (!_visualizer->updatePointCloud(pcl::PointCloud <pcl::PointXYZ>::ConstPtr(cloud), "input cloud"))
+		//{
+		//	_visualizer->addPointCloud<pcl::PointXYZ> (pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
+		//}
 
 		_visualizer->spinOnce(100);
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		this->GetScanFromUrg();
+		//this->GetScanFromUrg();
 
 		{
 			_updateMutex->lock();

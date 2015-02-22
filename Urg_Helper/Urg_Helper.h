@@ -33,7 +33,6 @@ protected:
 	qrk::Urg_driver *urg;
 
 	Common::IMU *_imu;
-	std::thread *_imuThread;
 
 	bool _updateCloud;
 	std::mutex* _updateMutex;

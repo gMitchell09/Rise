@@ -68,6 +68,8 @@ namespace Common
 			_positionHistory.push(qt);
 			_queueLock->unlock();
 		}
+
+		std::cout << "Finished IMU!!!" << std::endl;
 	}
 
 	long IMU::getTimeStamp()
@@ -108,18 +110,23 @@ namespace Common
 		{
 			return Quaternion();
 		}
+
 		do
 		{
 			_queueLock->lock();
 			qt_prev = _positionHistory.front();
-			if (qt_prev.timestamp > timestamp) break;
+			if (qt_prev.timestamp > timestamp) 
+			{
+				_queueLock->unlock();
+				break;
+			}
 			_positionHistory.pop();
 			
 			if (_positionHistory.empty())
 			{
+				_queueLock->unlock();
 				break;
 			}
-			
 			qt_post = _positionHistory.front();
 			_queueLock->unlock();
 			
@@ -129,7 +136,7 @@ namespace Common
 
 		if (!isValid)
 		{
-			std::cout << "Empty: " << _positionHistory.empty() << std::endl << "Prev: " << qt_prev.timestamp << " : " << "current: " << timestamp << " : post: " << qt_post.timestamp << std::endl;
+			std::cout << "Empty: " << _positionHistory.size() << std::endl << "Prev: " << qt_prev.timestamp << " : " << "current: " << timestamp << " : post: " << qt_post.timestamp << std::endl;
 		}
 
 		if (isValid) 
@@ -137,6 +144,7 @@ namespace Common
 			std::cout << "Slerp!" << std::endl;
 			return Quaternion(qt_prev.q, qt_post.q, float(timestamp - qt_prev.timestamp) / float(qt_post.timestamp));
 		}
+
 		else return Quaternion();
 	}
 

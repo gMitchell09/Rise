@@ -6,6 +6,7 @@
 #include <string>
 #include <thread>
 #include <mutex>
+#include <atomic>
 
 class Serial;
 namespace Common
@@ -42,7 +43,7 @@ namespace Common
 		std::queue<Quaternion_Time> _positionHistory;
 		std::mutex *_queueLock;
 		bool _isSendingQuatData;
-		bool _running;
+		std::atomic<bool> _running;
 		std::thread imuThread;
 
 	};
