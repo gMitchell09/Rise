@@ -84,6 +84,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CloudMeshAdapter.h" />
     <ClInclude Include="FakeUrg.h" />
     <ClInclude Include="IMU.h" />
     <ClInclude Include="Point_Common.h" />
@@ -97,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="CloudMeshAdapter.cpp" />
     <ClCompile Include="FakeUrg.cpp" />
     <ClCompile Include="IMU.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>

@@ -12,6 +12,7 @@
 #include "Urg_Helper.h"
 #include "Quaternion_Common.h"
 #include "Point_Common.h"
+#include "CloudMeshAdapter.h"
 
 #include <thread>
 #include <mutex>
@@ -147,16 +148,28 @@ bool Urg_Helper::StartPCLVisualizer()
 	  std::cout << "Genarating example point clouds.\n\n";
 
 	while( this->GetScanFromUrg() );
-	while( this->GetScanFromUrg() );
-	while( this->GetScanFromUrg() );
-	while( this->GetScanFromUrg() );
-	while( this->GetScanFromUrg() );
+	//while( this->GetScanFromUrg() );
+	//while( this->GetScanFromUrg() );
+	//while( this->GetScanFromUrg() );
+	//while( this->GetScanFromUrg() );
 	//this->GetScanFromUrg();
 
+	//_visualizer->addPolygonMesh(*CloudMeshAdapter::GetMeshFromCloud(cloud->makeShared()));
+	
+	//std::cout << "Polygon mesh generated" << std::endl;
+
+	/*Eigen::Affine3f t;
+	t.scale(Eigen::Vector3f(0.01, 0.01, 0.01));
+	_visualizer->addCoordinateSystem(1.0, t);*/
+	_visualizer->addCoordinateSystem(1000.0);
+	//_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 0.0, 1.0, "input cloud");
+	_visualizer->addPlane(CloudMeshAdapter::GetPlanesFromCloud(cloud->makeShared()), "wall_0");
+	//_visualizer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 0.0, 1.0, "wall_0");
+
+	_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 1.0, 1.0, "input cloud");
 	_visualizer->addPointCloud<pcl::PointXYZ> (pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
 	_visualizer->setBackgroundColor(0.0, 0.0, 0.0);
 	_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "input cloud");
-	_visualizer->addCoordinateSystem(1000.0);
 	_visualizer->initCameraParameters();
 
 	boost::function <void(const pcl::visualization::KeyboardEvent&)> f =
