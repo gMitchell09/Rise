@@ -25,16 +25,15 @@
 
 //Contructor that intiates both a the pointcloud and the drvier for the lidar
 Urg_Helper::Urg_Helper() : 
-	_visualizer(new pcl::visualization::PCLVisualizer("Cloud"))
+	_visualizer(new pcl::visualization::PCLVisualizer("Cloud")),
+	cloud(new pcl::PointCloud <pcl::PointXYZ>())
 {
 	_updateMutex = new std::mutex();
-	this->cloud = new pcl::PointCloud <pcl::PointXYZ>();
 	this->urg = new qrk::Urg_driver();
 }
 //Decontructor that deletes the cloud closes the Lidar connection and deletes the object
 Urg_Helper::~Urg_Helper()
 {
-	_visualizer->removePointCloud("input cloud");
 	_visualizer->close();
 
 //	delete cloud;
@@ -57,12 +56,13 @@ pcl::PointXYZ Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, bool 
 	else
 		realAngle = angle;
 
-	// These formaluas are taken directly from spherical coordinates calculations.
+	// First convert polar coordinates (r, theta coming straight from LIDAR)
 	pcl::PointXYZ lidarCart;
 	lidarCart.x = 0;
 	lidarCart.y = static_cast<float>(cos(theta) * radius);
 	lidarCart.z = static_cast<float>(sin(theta) * radius);
 
+	// Rotate these values about the Z axis from the IMU yaw value
 	temp.x = static_cast<float>(lidarCart.x * cos(realAngle) + lidarCart.y * sin(realAngle));
 	temp.y = static_cast<float>(-lidarCart.x * sin(realAngle) + lidarCart.y * cos(realAngle));
 	temp.z = static_cast<float>(lidarCart.z);
@@ -167,7 +167,7 @@ bool Urg_Helper::StartPCLVisualizer()
 	//_visualizer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 0.0, 1.0, "wall_0");
 
 	_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 1.0, 1.0, "input cloud");
-	_visualizer->addPointCloud<pcl::PointXYZ> (pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
+	_visualizer->addPointCloud<pcl::PointXYZ> (cloud->makeShared(), "input cloud");
 	_visualizer->setBackgroundColor(0.0, 0.0, 0.0);
 	_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "input cloud");
 	_visualizer->initCameraParameters();

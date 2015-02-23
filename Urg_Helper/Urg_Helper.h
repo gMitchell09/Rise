@@ -28,7 +28,7 @@ public:
 	~Urg_Helper();
 
 protected:
-	pcl::PointCloud <pcl::PointXYZ> *cloud;
+	pcl::PointCloud <pcl::PointXYZ>::Ptr cloud;
 	pcl::PointXYZ CreatePoint(int ScanNo, int radius, float angle, bool degrees);
 	qrk::Urg_driver *urg;
 
