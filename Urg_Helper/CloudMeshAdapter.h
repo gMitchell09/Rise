@@ -6,7 +6,6 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/surface/gp3.h>
 
-
 class CloudMeshAdapter
 {
 public:
@@ -16,5 +15,9 @@ public:
 
 	static pcl::PolygonMesh::ConstPtr GetMeshFromCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
 	static pcl::ModelCoefficients GetPlanesFromCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
+	
+	static bool PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+	static bool StatisticOutlierRemovalFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+	static std::vector<pcl::ModelCoefficients> PlaneDetection(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
 };
 
