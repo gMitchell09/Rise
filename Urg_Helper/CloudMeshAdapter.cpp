@@ -99,38 +99,46 @@ pcl::ModelCoefficients CloudMeshAdapter::GetPlanesFromCloud(pcl::PointCloud<pcl:
 	return *coeff;
 }
 
-bool CloudMeshAdapter::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
+pcl::PointCloud<pcl::PointXYZ>::Ptr CloudMeshAdapter::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 {
 
-	double passFilterXMin = 0, passFilterXMax = 10000;
-	double passFilterYMin = 0, passFilterYMax = 10000;
+	double passFilterXMin = -30000, passFilterXMax = 30000;
+	double passFilterYMin = -30000, passFilterYMax = 30000;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr outCloud(new pcl::PointCloud<pcl::PointXYZ>());
+	pcl::PointCloud<pcl::PointXYZ>::Ptr outCloudInt(new pcl::PointCloud<pcl::PointXYZ>());
 
 	pcl::PassThrough<pcl::PointXYZ> pass;
 	pass.setInputCloud (cloud);
 	pass.setFilterFieldName ("x");
 	pass.setFilterLimits (passFilterXMin, passFilterXMax);
-	pass.filter(*cloud);
+	pass.filter(*outCloud);
 
-	pass.setInputCloud(cloud);
+	pass.setInputCloud(outCloud);
 	pass.setFilterFieldName("y");
 	pass.setFilterLimits(passFilterYMin, passFilterYMax);
-	pass.filter(*cloud);
+	pass.filter(*outCloudInt);
 
-	return true;
+	pass.setInputCloud(outCloudInt);
+	pass.setFilterFieldName("z");
+	pass.setFilterLimits(passFilterYMin, passFilterYMax);
+	pass.filter(*outCloud);
+
+	return outCloud;
 }
 
-bool CloudMeshAdapter::StatisticOutlierRemovalFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
+pcl::PointCloud<pcl::PointXYZ>::Ptr CloudMeshAdapter::StatisticOutlierRemovalFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 {
 	double outlierMeanK = 10;
 	double outlierStddevMulThresh = 10;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr outCloud(new pcl::PointCloud<pcl::PointXYZ>());
 
 	pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
 	sor.setInputCloud(cloud);
 	sor.setMeanK(outlierMeanK);
 	sor.setStddevMulThresh(outlierStddevMulThresh);
-	sor.filter(*cloud);
+	sor.filter(*outCloud);
 
-	return true;
+	return outCloud;
 }
 
 std::vector<pcl::ModelCoefficients> CloudMeshAdapter::PlaneDetection(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
@@ -151,8 +159,10 @@ std::vector<pcl::ModelCoefficients> CloudMeshAdapter::PlaneDetection(pcl::PointC
 	mps.setInputNormals(normals);
 	mps.setInputCloud(cloud);
 
-	std::vector<pcl::PlanarRegion<pcl::PointXYZ>> regions;
-//	mps.segmentAndRefine(regions);
+	std::vector<pcl::PlanarRegion<pcl::PointXYZ>, 
+		Eigen::aligned_allocator<pcl::PlanarRegion<pcl::PointXYZ>>> regions;
+
+	mps.segmentAndRefine(regions);
 
 	std::vector<pcl::ModelCoefficients> coeff;
 

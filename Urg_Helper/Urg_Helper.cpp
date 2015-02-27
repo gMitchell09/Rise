@@ -163,10 +163,13 @@ bool Urg_Helper::StartPCLVisualizer()
 	_visualizer->addCoordinateSystem(1.0, t);*/
 	_visualizer->addCoordinateSystem(1000.0);
 	//_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 0.0, 1.0, "input cloud");
-	_visualizer->addPlane(CloudMeshAdapter::GetPlanesFromCloud(cloud->makeShared()), "wall_0");
+	//_visualizer->addPlane(CloudMeshAdapter::GetPlanesFromCloud(cloud->makeShared()), "wall_0");
 	//_visualizer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 0.0, 1.0, "wall_0");
 
-	_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 1.0, 1.0, "input cloud");
+	cloud = CloudMeshAdapter::PassThroughFilter(cloud->makeShared());
+	cloud = CloudMeshAdapter::StatisticOutlierRemovalFilter(cloud->makeShared());
+	std::vector<pcl::ModelCoefficients> planes = CloudMeshAdapter::PlaneDetection(cloud->makeShared());
+
 	_visualizer->addPointCloud<pcl::PointXYZ> (cloud->makeShared(), "input cloud");
 	_visualizer->setBackgroundColor(0.0, 0.0, 0.0);
 	_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "input cloud");

@@ -16,8 +16,8 @@ public:
 	static pcl::PolygonMesh::ConstPtr GetMeshFromCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
 	static pcl::ModelCoefficients GetPlanesFromCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
 	
-	static bool PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
-	static bool StatisticOutlierRemovalFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+	static pcl::PointCloud<pcl::PointXYZ>::Ptr PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+	static pcl::PointCloud<pcl::PointXYZ>::Ptr StatisticOutlierRemovalFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 	static std::vector<pcl::ModelCoefficients> PlaneDetection(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
 };
 
