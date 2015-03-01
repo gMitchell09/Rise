@@ -39,7 +39,7 @@ bool Urg_Helper_Mock::ConnectToUrg()
 
 bool Urg_Helper_Mock::GetScanFromUrg()
 {
-	std::cout << "Scanning..." << std::endl;
+	//std::cout << "Scanning..." << std::endl;
 	std::vector<long> data;
 	long timestamp;
 	if (!urg->get_distance(data, &timestamp))

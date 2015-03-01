@@ -141,7 +141,7 @@ namespace Common
 
 		if (isValid) 
 		{
-			std::cout << "Slerp!" << std::endl;
+			//std::cout << "Slerp!" << std::endl;
 			return Quaternion(qt_prev.q, qt_post.q, float(timestamp - qt_prev.timestamp) / float(qt_post.timestamp));
 		}
 
