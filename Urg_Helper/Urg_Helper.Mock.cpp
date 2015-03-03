@@ -17,11 +17,11 @@ bool Urg_Helper_Mock::ConnectToUrg()
 	{
 		std::string userHome = std::string(std::getenv("USERPROFILE"));
 
-		Serial_Mock *s = new Serial_Mock(userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\imu9.txt"));
+		Serial_Mock *s = new Serial_Mock(userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\imu10.txt"));
 		_imu = new Common::IMU(s);
 		Sleep(1000); // sleep for 1s so IMU data can be processed...
 
-		std::string lidarPath = userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\lidar9.txt");
+		std::string lidarPath = userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\lidar10.txt");
 
 		if (!urg->open(lidarPath.c_str()))
 		{

@@ -45,7 +45,6 @@ namespace Common
 		bool _isSendingQuatData;
 		std::atomic<bool> _running;
 		std::thread imuThread;
-
 	};
 }
 #endif

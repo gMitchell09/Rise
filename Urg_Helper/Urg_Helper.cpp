@@ -22,6 +22,8 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/ply_io.h>
 
+#include <boost/interprocess/mapped_region.hpp>
+
 #define ABS(x) ((x < 0) ? (-x) : (x))
 
 //Contructor that intiates both a the pointcloud and the drvier for the lidar

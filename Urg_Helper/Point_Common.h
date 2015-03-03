@@ -1,6 +1,7 @@
 #ifndef POINT_COMMON_H
 #define POINT_COMMON_H
 #include "Quaternion_Common.h"
+#include <pcl/common/common_headers.h>
 
 namespace Common
 {
@@ -22,6 +23,15 @@ public:
 	friend PointXYZ operator+(const PointXYZ& first, const PointXYZ& second);
 	PointXYZ Rotate(const Quaternion& quat);
 	PointXYZ Cross(PointXYZ other);
+
+	operator pcl::PointXYZ() const
+	{
+		pcl::PointXYZ point;
+		point.x = this->x;
+		point.y = this->y;
+		point.z = this->z;
+		return point;
+	}
 };
 }
 #endif

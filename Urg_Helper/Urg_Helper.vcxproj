@@ -93,6 +93,7 @@
     <ClInclude Include="SerialClass.h" />
     <ClInclude Include="SerialClass.Mock.h" />
     <ClInclude Include="Stdafx.h" />
+    <ClInclude Include="TravelGrid.h" />
     <ClInclude Include="Urg_Helper.h" />
     <ClInclude Include="Urg_Helper.Mock.h" />
   </ItemGroup>
@@ -118,6 +119,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="SerialClass.Mock.cpp" />
+    <ClCompile Include="TravelGrid.cpp" />
     <ClCompile Include="Urg_Helper.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
