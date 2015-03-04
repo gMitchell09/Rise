@@ -19,5 +19,6 @@ public:
 	static pcl::PointCloud<pcl::PointXYZ>::Ptr PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 	static pcl::PointCloud<pcl::PointXYZ>::Ptr StatisticOutlierRemovalFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 	static std::vector<pcl::ModelCoefficients> PlaneDetection(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
+	static std::vector<pcl::ModelCoefficients> UnorganizedPlaneDetection(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
 };
 
