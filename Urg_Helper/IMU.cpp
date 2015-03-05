@@ -4,15 +4,26 @@
 
 #include <thread>
 #include <mutex>
+#include <limits>
 
 namespace Common
 {
-	IMU::IMU(Serial *serial) : _isSendingQuatData(false), _running(true), 
-		_imuSerial(serial), _queueLock(new std::mutex()),
-		imuThread(std::bind(&IMU::readQuaternion, this))
+	IMU::IMU(std::shared_ptr<Serial> serial) :
+		_isSendingQuatData(false), 
+		_running(true), 
+		_imuSerial(serial), 
+		_queueLock(std::unique_ptr<std::mutex>(new std::mutex())),
+		_imuThread(std::bind(&IMU::readQuaternion, this))
 	{
 		if (!_imuSerial->IsConnected())
 			throw "Could not connect to arduino";
+	}
+
+	IMU::~IMU()
+	{
+		this->stopThread();
+		if (_imuThread.joinable())
+			_imuThread.join();
 	}
 
 	void IMU::stopThread()
@@ -146,13 +157,5 @@ namespace Common
 		}
 
 		else return Quaternion();
-	}
-
-	IMU::~IMU()
-	{
-		this->stopThread();
-		if (imuThread.joinable())
-			imuThread.join();
-		delete _imuSerial;
 	}
 }

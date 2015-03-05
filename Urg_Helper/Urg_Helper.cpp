@@ -17,6 +17,8 @@
 #include <thread>
 #include <mutex>
 #include <string>
+#include <cmath>
+#define isnan(x) _isnan(x)
 
 #include <pcl/common/common_headers.h>
 #include <pcl/io/pcd_io.h>
@@ -29,35 +31,25 @@
 //Contructor that intiates both a the pointcloud and the drvier for the lidar
 Urg_Helper::Urg_Helper() : 
 	_visualizer(new pcl::visualization::PCLVisualizer("Cloud")),
-	cloud(new pcl::PointCloud <pcl::PointXYZ>())
-{
-	_updateMutex = new std::mutex();
-	this->urg = new qrk::Urg_driver();
-}
+	cloud(new pcl::PointCloud <pcl::PointXYZ>()),
+	urg(std::unique_ptr<qrk::Urg_driver>(new qrk::Urg_driver())),
+	_updateMutex(std::unique_ptr<std::mutex> (new std::mutex()))
+{}
+
 //Decontructor that deletes the cloud closes the Lidar connection and deletes the object
 Urg_Helper::~Urg_Helper()
 {
 	_visualizer->close();
 
-//	delete cloud;
 	this->urg->close();
-	delete urg;
-	delete _imu;
 }
 //This function takes each point input and cnoverts it into a 3D point. using the scanNo from the URG a radius and the phi angle
-pcl::PointXYZ Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, bool degrees)
+pcl::PointXYZ Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, Common::PointXYZ roverPos)
 {
 	//Creates a pcl point object to store the 3D data.
 	pcl::PointXYZ temp;
 	// gets the theta angle from the urg function that converts the scan number into an angle in radians.
 	double theta = urg->index2rad(ScanNo);
-
-	//Converts degrees to radians
-	double realAngle;
-	if (degrees)
-		realAngle = (double) (angle * 3.14159265359)/180;
-	else
-		realAngle = angle;
 
 	// First convert polar coordinates (r, theta coming straight from LIDAR)
 	pcl::PointXYZ lidarCart;
@@ -66,9 +58,14 @@ pcl::PointXYZ Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, bool 
 	lidarCart.z = static_cast<float>(sin(theta) * radius);
 
 	// Rotate these values about the Z axis from the IMU yaw value
-	temp.x = static_cast<float>(lidarCart.x * cos(realAngle) + lidarCart.y * sin(realAngle));
-	temp.y = static_cast<float>(-lidarCart.x * sin(realAngle) + lidarCart.y * cos(realAngle));
+	temp.x = static_cast<float>(lidarCart.x * cos(angle) + lidarCart.y * sin(angle));
+	temp.y = static_cast<float>(-lidarCart.x * sin(angle) + lidarCart.y * cos(angle));
 	temp.z = static_cast<float>(lidarCart.z);
+
+	temp.x += roverPos.x;
+	temp.y += roverPos.y;
+	temp.z += roverPos.z;
+
 	return temp;
 }
 
@@ -86,8 +83,11 @@ bool Urg_Helper::ConnectToUrg()
 	//This port is for the arduino. Leave in the backslashes and periods.
 	try
 	{
-		Serial *s = new Serial(std::string("\\\\.\\COM19"));
-		_imu = new Common::IMU(s);
+		std::shared_ptr<Serial> rotSerial = std::shared_ptr<Serial> (new Serial(std::string("\\\\.\\COM19")));
+		_rotImu = std::shared_ptr<Common::IMU>(new Common::IMU(rotSerial));
+
+		std::shared_ptr<Serial> posSerial = std::shared_ptr<Serial> (new Serial(std::string("\\\\.\\COMXX")));
+		_posIMU = std::shared_ptr<Common::IMU>(new Common::IMU(posSerial));
 
 		urg->start_measurement(qrk::Urg_driver::Distance);
 		Sleep(2000);
@@ -107,14 +107,16 @@ bool Urg_Helper::GetScanFromUrg()
 	{
 		return false;
 	}
-	Common::Quaternion qt = _imu->findTimestamp(timestamp);
-	if (qt.x == -1 && qt.y == -1 && qt.z == -1 && qt.w == -1) return false;
+	Common::Quaternion qt = _rotImu->findTimestamp(timestamp);
+	if (isnan(qt.x) || isnan(qt.y) || isnan(qt.z) || isnan(qt.w)) return false;
 	double rotation = qt.yaw();
 
-	/*angle = time_stamp/1000.0 * 360;*/
+	Common::Quaternion pos = _posIMU->findTimestamp(timestamp);
+	if (isnan(pos.x) || isnan(pos.y) || isnan(pos.z)) return false;
+
 	for (int i = 0; i < data.size(); i++)
 	{
-		pcl::PointXYZ tempPoint = CreatePoint(i, data[i], rotation, false);
+		pcl::PointXYZ tempPoint = CreatePoint(i, data[i], rotation, pos.GetPoint());
 		cloud->push_back(tempPoint);
 	}
 

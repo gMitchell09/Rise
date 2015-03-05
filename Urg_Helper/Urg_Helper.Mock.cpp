@@ -3,7 +3,7 @@
 
 Urg_Helper_Mock::Urg_Helper_Mock()
 {
-	this->urg = new FakeUrg();
+	this->urg = std::unique_ptr<FakeUrg> (new FakeUrg());
 }
 
 Urg_Helper_Mock::~Urg_Helper_Mock()
@@ -17,8 +17,12 @@ bool Urg_Helper_Mock::ConnectToUrg()
 	{
 		std::string userHome = std::string(std::getenv("USERPROFILE"));
 
-		Serial_Mock *s = new Serial_Mock(userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\imu10.txt"));
-		_imu = new Common::IMU(s);
+		std::shared_ptr<Serial_Mock> s = std::shared_ptr<Serial_Mock>(new Serial_Mock(userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\imu10.txt")));
+		_rotImu = std::shared_ptr<Common::IMU>(new Common::IMU(s));
+
+		std::shared_ptr<Serial_Mock> posIMUSerial = std::shared_ptr<Serial_Mock>(new Serial_Mock(userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\imuPos.txt")));
+		_posIMU = std::shared_ptr<Common::IMU>(new Common::IMU(posIMUSerial));
+
 		Sleep(1000); // sleep for 1s so IMU data can be processed...
 
 		std::string lidarPath = userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\lidar10.txt");
@@ -39,27 +43,5 @@ bool Urg_Helper_Mock::ConnectToUrg()
 
 bool Urg_Helper_Mock::GetScanFromUrg()
 {
-	//std::cout << "Scanning..." << std::endl;
-	std::vector<long> data;
-	long timestamp;
-	if (!urg->get_distance(data, &timestamp))
-	{
-		return false;
-	}
-
-	Common::Quaternion qt = _imu->findTimestamp(timestamp);
-	if (qt.x == -1 && qt.y == -1 && qt.z == -1 && qt.w == -1) return false;
-	double rotation = qt.yaw();
-
-	for (int i = 0; i < data.size(); i++)
-	{
-		pcl::PointXYZ tempPoint = CreatePoint(i, data[i], rotation, false);
-		cloud->push_back(tempPoint);
-	}
-
-	_updateMutex->lock();
-	_updateCloud = true;
-	_updateMutex->unlock();
-
-	return true;
+	return Urg_Helper::GetScanFromUrg();
 }

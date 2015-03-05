@@ -1,11 +1,13 @@
 #include "Stdafx.h"
 #include "Quaternion_Common.h"
 
+#include <limits>
+
 namespace Common
 {
 	Quaternion::Quaternion()
 	{
-		x = y = z = w = -1;
+		x = y = z = w = std::numeric_limits<float>::signaling_NaN();
 	}
 
 	Quaternion::Quaternion(PointXYZ p)
