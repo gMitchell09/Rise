@@ -109,7 +109,7 @@ bool Urg_Helper::GetScanFromUrg()
 	}
 	Common::Quaternion qt = _rotImu->findTimestamp(timestamp);
 	if (isnan(qt.x) || isnan(qt.y) || isnan(qt.z) || isnan(qt.w)) return false;
-	double rotation = qt.yaw();
+	double rotation = qt.pitch();
 
 	Common::Quaternion pos = _posIMU->findTimestamp(timestamp);
 	if (isnan(pos.x) || isnan(pos.y) || isnan(pos.z)) return false;

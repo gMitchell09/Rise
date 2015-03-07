@@ -146,50 +146,51 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr CloudMeshAdapter::StatisticOutlierRemovalFil
 
 std::vector<pcl::ModelCoefficients> CloudMeshAdapter::UnorganizedPlaneDetection(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
 {
-	// First we will apply a VoxelGrid filter to our point cloud to eliminate the reduntant points
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>());
-	pcl::VoxelGrid<pcl::PointXYZ> sor;
-	sor.setInputCloud(cloud);
-	sor.setLeafSize(10, 10, 10); // set leaf size to 1cm
-	sor.filter (*cloud_filtered);
+	std::vector<pcl::ModelCoefficients> coeff;
+	//// First we will apply a VoxelGrid filter to our point cloud to eliminate the reduntant points
+	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>());
+	//pcl::VoxelGrid<pcl::PointXYZ> sor;
+	//sor.setInputCloud(cloud);
+	//sor.setLeafSize(10, 10, 10); // set leaf size to 1cm
+	//sor.filter (*cloud_filtered);
 
 
-	pcl::ModelCoefficients::Ptr coeff (new pcl::ModelCoefficients());
-	pcl::PointIndices::Ptr inliers (new pcl::PointIndices());
+	//pcl::ModelCoefficients::Ptr coeff (new pcl::ModelCoefficients());
+	//pcl::PointIndices::Ptr inliers (new pcl::PointIndices());
 
-	// Create segmentation object
-	pcl::SACSegmentation<pcl::PointXYZ> seg;
-	seg.setOptimizeCoefficients(true);
-	seg.setModelType (pcl::SACMODEL_PLANE);
-	seg.setMethodType(pcl::SAC_RANSAC);
-	seg.setMaxIterations(1000);
-	seg.setDistanceThreshold(10);
+	//// Create segmentation object
+	//pcl::SACSegmentation<pcl::PointXYZ> seg;
+	//seg.setOptimizeCoefficients(true);
+	//seg.setModelType (pcl::SACMODEL_PLANE);
+	//seg.setMethodType(pcl::SAC_RANSAC);
+	//seg.setMaxIterations(1000);
+	//seg.setDistanceThreshold(10);
 
-	pcl::ExtractIndices<pcl::PointXYZ> extract;
+	//pcl::ExtractIndices<pcl::PointXYZ> extract;
 
-	int i=0, nr_points = (int)cloud_filtered->points.size();
-	while (cloud_filtered->points.size() > 0.3 * nr_points)
-	{
-		seg.setInputCloud (cloud_filtered);
-		seg.segment (*inliers, *coeff);
-		if (inliers->indices.size() == 0)
-		{
-			std::cerr << "Could not estimage a planar model for the given dataset" << std::endl;
-			break;
-		}
+	//int i=0, nr_points = (int)cloud_filtered->points.size();
+	//while (cloud_filtered->points.size() > 0.3 * nr_points)
+	//{
+	//	seg.setInputCloud (cloud_filtered);
+	//	seg.segment (*inliers, *coeff);
+	//	if (inliers->indices.size() == 0)
+	//	{
+	//		std::cerr << "Could not estimage a planar model for the given dataset" << std::endl;
+	//		break;
+	//	}
 
-		extract.setInputCloud (cloud_filtered);
-		extract.setIndices (inliers);
-		extract.setNegative (false);
-		extract.filter (*cloud_p);
-		std::cerr << "PointCloud representing the planar component: " << cloud_p->width * cloud_p->height << " data points." << std::endl;
+	//	extract.setInputCloud (cloud_filtered);
+	//	extract.setIndices (inliers);
+	//	extract.setNegative (false);
+	//	extract.filter (*cloud_p);
+	//	std::cerr << "PointCloud representing the planar component: " << cloud_p->width * cloud_p->height << " data points." << std::endl;
 
-		extract.setNegative(true);
-		extract.filter (*cloud_f);
-		cloud_filtered.swap (cloud_f);
+	//	extract.setNegative(true);
+	//	extract.filter (*cloud_f);
+	//	cloud_filtered.swap (cloud_f);
 
-		i++;
-	}
+	//	i++;
+	//}
 
 	return coeff;
 }
