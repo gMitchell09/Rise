@@ -189,3 +189,12 @@ std::vector<pcl::ModelCoefficients> CloudMeshAdapter::PlaneDetection(pcl::PointC
 
 	return coeff;
 }
+
+void CloudMeshAdapter::FlattenCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud3d, pcl::PointCloud<pcl::PointXYZL>::Ptr grid2d, size_t cellWidth)
+{
+	// steps:
+	//    Iterate over grid with cells ranging from (x, y) to (x + cellWidth, y + cellWidth) and grab all points with any Z-value.
+	//	  Convert this to a PointXYZL with Z = width, L = #points
+	// profit.
+}
+
