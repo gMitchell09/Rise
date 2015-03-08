@@ -119,20 +119,82 @@ def createUniqueFile(name, ext):
 
 current_milli_time = lambda: int(round(time() * 1000))
 
+def duplicateObject(scene, name, copy_obj):
+    
+    mesh = bpy.data.meshes.new(name)
+    ob_new = bpy.data.objects.new(name, mesh)
+    ob_new.data = copy_obj.data.copy()
+    ob_new.scale = copy_obj.scale
+    ob_new.location = copy_obj.location
+    ob_new.rotation_axis_angle = copy_obj.rotation_axis_angle   
+    ob_new.parent = copy_obj.parent
+    scene.objects.link(ob_new)
+    
+    return ob_new
+
+def duplicateGroup(scene, group):
+    for obj in group.objects:
+        name = obj.name + "_tmp"
+        duplicateObject(scene, name, obj)
+    
+def removeTempObjects(scene):
+    for obj in scene.objects:
+        if obj.name.find("_tmp") != -1:
+            scene.objects.unlink(obj)
+            
+def moveRover(rover, distance):
+    # assuming the rover is constrained to a path, we can move on any axis.
+    rover.location.x += distance/3
+    rover.location.y += distance/3
+    rover.location.z += distance/3
+    rover.select = True
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    
+def getObjectInLayer(name, layer):
+    return [obj for obj in bpy.data.objects if obj.name.find(name) != -1 and obj.layers[layer] == True][0]
+    
 @oglWrapper
 def main():
-    print ("-----------------------Start----------------------")
-    mesh = bpy.data.meshes['Lidar_Scan_Mesh']
-    object = bpy.data.objects['Lidar_Scan_Object']
-    imuObj = bpy.data.objects['IMU_Object']
-    rotObj = bpy.data.objects['Lidar_Rotation_Tracker']
     
+    # objects needed:
+    #  - Lidar_Scan_Object + Mesh
+    #  - IMU_Rotation
+    #  - IMU_Position
+    #  - Rover_Base
+    
+    # groups to copy:
+    #  - lidarGroup, roverGroup
+    
+    print ("-----------------------Start----------------------")
+    
+    lidarGroup = bpy.data.groups["Lidar_Template"]
+    roverGroup = bpy.data.groups["Rover_Template"]
+    
+    scene = bpy.data.scenes[0]
+    
+    #duplicateGroup(scene, lidarGroup)
+    #duplicateGroup(scene, roverGroup)
+    
+    object = getObjectInLayer("Lidar_Scan_Object", 0) #bpy.data.objects['Lidar_Scan_Object']
+    mesh = object.data
+    imuPos = getObjectInLayer("IMU_Position", 0) #bpy.data.objects['IMU_Rotation']
+    imuRot = getObjectInLayer("IMU_Rotation", 0) #bpy.data.objects['IMU_Position']
+    
+    roverPath = getObjectInLayer("RoverPath", 0) #bpy.data.objects["RoverPath"]
+    roverBase = getObjectInLayer("Rover_Base", 0) #bpy.data.objects["Rover_Base_tmp"]
+    
+    roverBase.constraints.new(type="CLAMP_TO")
+    roverBase.constraints["Clamp To"].target = roverPath
+    
+    # /////////////////////////////////////////
     imu_file = createUniqueFile("imu", ".txt")
     lidar_file = createUniqueFile("lidar", ".txt")
+    imu_pos_file = createUniqueFile("imu_pos", ".txt")
     
     print("Unique files created")
     
     imu_file_string = bytes()
+    imu_pos_file_string = bytes()
     lidar_file_string = bytes()
     
     timestamp = 0 # ticks in ms
@@ -141,8 +203,13 @@ def main():
     time_between_imu_readings = 5
     time_between_lidar_readings = 25
     
+    rover_speed = 0.3 # mm/msec
+    
     time_of_last_imu_read = -1
+    time_of_last_imu_pos_read = -1
     time_of_last_lidar_read = -1
+    
+    imu_pos_start = imuPos.location
 
     # scan time = 25ms
     # rotation speed = 120RPM
@@ -164,19 +231,28 @@ def main():
             time_of_last_lidar_read = timestamp
             
         if (timestamp - time_of_last_imu_read > time_between_imu_readings):
-            quat = imuObj.matrix_world.to_quaternion()
+            quat = imuRot.matrix_world.to_quaternion()
+            #print ("Rot: ", imuRot.matrix_world.to_euler('XYZ'))
             floatArray = array('f', [quat.w, quat.x, quat.y, quat.z])
             imu_file_string += bytes('~' + str(timestamp) + 'D', 'UTF-8') + floatArray.tobytes() + bytes('E', 'UTF-8')
             time_of_last_imu_read = timestamp
             
+        if (True or timestamp - time_of_last_imu_pos_read > time_between_imu_readings):
+            quat = imu_pos_start - imuPos.location
+            print ("Pos: ", imuPos.location)
+            floatArray = array('f', [0, quat.x, quat.y, quat.z])
+            imu_pos_file_string += bytes('~' + str(timestamp) + 'D', 'UTF-8') + floatArray.tobytes() + bytes('E', 'UTF-8')
+            time_of_last_imu_pos_read = timestamp
+            
         rotateLidar(object, lidar_spin_speed * (timestamp - prev_timestamp))
+        moveRover(roverBase, rover_speed * (timestamp - prev_timestamp))
             
         #print("Time: ", timestamp)
         #print ("Q: ", imuObj.matrix_world.to_quaternion())
         
     bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
     sleep(1)
-    correctLidarRotation(object, rotObj)
+    removeTempObjects(scene)
     
     print ("")
     print ("")
@@ -188,8 +264,10 @@ def main():
     
     lidar_file.write(lidar_file_string)
     imu_file.write(imu_file_string)
+    imu_pos_file.write(imu_pos_file_string)
     
     lidar_file.close()
     imu_file.close()
+    imu_pos_file.close()
 
 main()

@@ -29,13 +29,15 @@ public:
 
 protected:
 	pcl::PointCloud <pcl::PointXYZ>::Ptr cloud;
-	pcl::PointXYZ CreatePoint(int ScanNo, int radius, float angle, bool degrees);
-	qrk::Urg_driver *urg;
+	pcl::PointXYZ CreatePoint(int ScanNo, int radius, float angle, Common::PointXYZ roverPos);
+	
+	std::unique_ptr<qrk::Urg_driver> urg;
 
-	Common::IMU *_imu;
+	std::shared_ptr<Common::IMU> _rotImu;
+	std::shared_ptr<Common::IMU> _posIMU;
 
 	bool _updateCloud;
-	std::mutex* _updateMutex;
+	std::unique_ptr<std::mutex> _updateMutex;
 
 	std::unique_ptr<pcl::visualization::PCLVisualizer> _visualizer;
 };

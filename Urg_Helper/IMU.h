@@ -20,10 +20,11 @@ namespace Common
 		long timestamp;
 	};
 
+	// ASSUMPTION: SLERP algorithm works for position vectors as well as quaternions.
 	class IMU
 	{
 	public:
-		IMU(Serial *serial);
+		IMU(std::shared_ptr<Serial> serial);
 
 		// thread-safe via mutex
 		void readQuaternion();
@@ -39,12 +40,21 @@ namespace Common
 	
 
 	private:
-		Serial* _imuSerial;
+		// WARNING: ABANDON ALL HOPE YE WHO ENTER HERE
+		// _imuThread _MUST_ be declared last because of some
+		//   esoteric C++ initializer list rule that the members are
+		//   initialized in the order in which they are declared here
+		//   and not in the order in which they appear in the init list.
+		//   This wouldn't normally be a problem, but in this case the
+		//   thread begins immediately and attempts utilizing these members
+		//   before they've been initialized.  Meh.
+
+		std::shared_ptr<Serial> _imuSerial;
 		std::queue<Quaternion_Time> _positionHistory;
-		std::mutex *_queueLock;
+		std::unique_ptr<std::mutex> _queueLock;
 		bool _isSendingQuatData;
 		std::atomic<bool> _running;
-		std::thread imuThread;
+		std::thread _imuThread;
 	};
 }
 #endif

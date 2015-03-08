@@ -19,7 +19,7 @@ public:
 	static pcl::PointCloud<pcl::PointXYZ>::Ptr PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 	static pcl::PointCloud<pcl::PointXYZ>::Ptr StatisticOutlierRemovalFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 	static std::vector<pcl::ModelCoefficients> PlaneDetection(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
-
 	static void FlattenCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud3d, pcl::PointCloud<pcl::PointXYZL>::Ptr grid2d, size_t cellWidth);
+	static std::vector<pcl::ModelCoefficients> UnorganizedPlaneDetection(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
 };
 
