@@ -183,8 +183,8 @@ def main():
     roverPath = getObjectInLayer("RoverPath", 0) #bpy.data.objects["RoverPath"]
     roverBase = getObjectInLayer("Rover_Base", 0) #bpy.data.objects["Rover_Base_tmp"]
     
-    roverBase.constraints.new(type="CLAMP_TO")
-    roverBase.constraints["Clamp To"].target = roverPath
+    #roverBase.constraints.new(type="CLAMP_TO")
+    #roverBase.constraints["Clamp To"].target = roverPath
     
     # /////////////////////////////////////////
     imu_file = createUniqueFile("imu", ".txt")
@@ -219,9 +219,9 @@ def main():
     #                = 0.15707963267948966192313216916398 rad/iter
     lidar_spin_speed = 0.01256637061435917295385057353312 # rad/ms
 
-    while (timestamp < 20000):
+    while (timestamp < 2000):
         prev_timestamp = timestamp
-        timestamp = current_milli_time() - startTime
+        timestamp = timestamp + 1 #current_milli_time() - startTime
         
         if (timestamp - time_of_last_lidar_read > time_between_lidar_readings):
             dist_data = ScanOnce(object, mesh)
@@ -232,7 +232,7 @@ def main():
             
         if (timestamp - time_of_last_imu_read > time_between_imu_readings):
             quat = imuRot.matrix_world.to_quaternion()
-            #print ("Rot: ", imuRot.matrix_world.to_euler('XYZ'))
+            print ("Rot: ", imuRot.matrix_world.to_euler('XYZ'))
             floatArray = array('f', [quat.w, quat.x, quat.y, quat.z])
             imu_file_string += bytes('~' + str(timestamp) + 'D', 'UTF-8') + floatArray.tobytes() + bytes('E', 'UTF-8')
             time_of_last_imu_read = timestamp

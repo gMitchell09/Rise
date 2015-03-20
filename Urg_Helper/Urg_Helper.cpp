@@ -18,7 +18,9 @@
 #include <mutex>
 #include <string>
 #include <cmath>
+
 #define isnan(x) _isnan(x)
+#define isfinite(x) _finite(x)
 
 #include <pcl/common/common_headers.h>
 #include <pcl/io/pcd_io.h>
@@ -107,6 +109,7 @@ bool Urg_Helper::GetScanFromUrg()
 	{
 		return false;
 	}
+
 	Common::Quaternion qt = _rotImu->findTimestamp(timestamp);
 	if (isnan(qt.x) || isnan(qt.y) || isnan(qt.z) || isnan(qt.w)) return false;
 	double rotation = qt.pitch();
@@ -116,6 +119,7 @@ bool Urg_Helper::GetScanFromUrg()
 
 	for (int i = 0; i < data.size(); i++)
 	{
+		if (!isfinite(data[i])) continue;
 		pcl::PointXYZ tempPoint = CreatePoint(i, data[i], rotation, pos.GetPoint());
 		cloud->push_back(tempPoint);
 	}
@@ -175,7 +179,22 @@ bool Urg_Helper::StartPCLVisualizer()
 	//std::vector<pcl::ModelCoefficients> planes = CloudMeshAdapter::PlaneDetection(cloud->makeShared());
 
 	//_visualizer->addPointCloud<pcl::PointXYZ> (cloud->makeShared(), "input cloud");
-	
+
+	//for (int x = -1000; x < 1000; x+=100)
+	//{
+	//	for (int y = -1000; y < 1000; y+=100)
+	//	{
+	//		pcl::PointXYZRGB a(128, 128, 0);
+	//		pcl::PointXYZRGB b(128, 128, 0);
+	//		a.x = b.x = x;
+	//		a.y = b.y = y;
+	//		a.z = b.z = 0;
+	//		std::string id = "Line: " + std::to_string(x) + "," + std::to_string(y);
+	//		_visualizer->addLine<pcl::PointXYZRGB>(a, b, id);
+	//		_visualizer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 30, id);
+	//	}
+	//}
+
 	_visualizer->addCoordinateSystem(1000.0);
 	_visualizer->setBackgroundColor(0.0, 0.0, 0.0);
 	_visualizer->initCameraParameters();
@@ -194,18 +213,7 @@ bool Urg_Helper::StartPCLVisualizer()
 		}
 
 		_visualizer->spinOnce(1);
-		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		this->GetScanFromUrg();
-
-		{
-			_updateMutex->lock();
-			if (_updateCloud)
-			{
-				//_visualizer->updatePointCloud(pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
-				_updateCloud = false;
-			}
-			_updateMutex->unlock();
-		}
 	}
 
 	return true;

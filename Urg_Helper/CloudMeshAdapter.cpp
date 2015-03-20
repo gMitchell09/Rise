@@ -12,6 +12,7 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/segmentation/organized_multi_plane_segmentation.h>
+#include <pcl/segmentation/region_growing.h>
 
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/extract_indices.h>
