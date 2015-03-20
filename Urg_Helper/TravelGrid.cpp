@@ -28,9 +28,11 @@ TravelGrid::~TravelGrid()
 
 TravelGrid::Cell::CellTypes TravelGrid::Cell::classify_cell(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
 {
-	float floorHeightGuess = 0.0;
+	float floorHeightGuess = -3.0;
 	float ceilingHeightGuess = 3.0;
-	float mean = 0, median = 0, mode = 0, min = 9999999, max = -99999999;
+	float mean = 0, median = 0, mode = 0;
+	float min = std::numeric_limits<float>::max();
+	float max = std::numeric_limits<float>::min();
 
 	for (auto itr = cloud->begin(); itr != cloud->end(); ++itr)
 	{
