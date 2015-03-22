@@ -7,7 +7,10 @@
 #include <pcl/surface/gp3.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
+#include <pcl/sample_consensus/ransac.h> 
+
 #include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/sample_consensus/sac_model_perpendicular_plane.h>
 
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/statistical_outlier_removal.h>
@@ -198,50 +201,50 @@ std::vector<pcl::ModelCoefficients> CloudMeshAdapter::UnorganizedPlaneDetection(
 
 std::vector<pcl::ModelCoefficients> CloudMeshAdapter::PlaneDetection(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
 {
-	pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
-	pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
-	pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
-	tree->setInputCloud (cloud);
-	n.setInputCloud (cloud);
-	n.setSearchMethod (tree);
-	n.setKSearch (20);
-	n.compute (*normals);
+	std::cout << "Plane detection" << std::endl;
+	//pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
+	//pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
+	//pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+	//tree->setInputCloud (cloud);
+	//n.setInputCloud (cloud);
+	//n.setSearchMethod (tree);
+	//n.setKSearch (20);
+	//n.compute (*normals);
 
-	pcl::OrganizedMultiPlaneSegmentation<pcl::PointXYZ, pcl::Normal, pcl::Label> mps;
-	mps.setMinInliers(10000);
-	mps.setAngularThreshold(0.017453 * 2.0); // 2 degrees
-	mps.setDistanceThreshold(20); // 20mm
-	mps.setInputNormals(normals);
-	mps.setInputCloud(cloud);
+	pcl::SampleConsensusModelPerpendicularPlane<pcl::PointXYZ>::Ptr model_p(
+		new pcl::SampleConsensusModelPerpendicularPlane<pcl::PointXYZ>(cloud));
+	Eigen::Vector3f xAxis(0, 1, 1);
+	Eigen::Vector3f yAxis(1, 0, 1);
+	Eigen::Vector3f zAxis(1, 1, 0);
+	Eigen::Vector3f nxAxis(0, -1, -1);
+	Eigen::Vector3f nyAxis(-1, 0, -1);
+	Eigen::Vector3f nzAxis(-1, -1, 0);
 
-	std::vector<pcl::PlanarRegion<pcl::PointXYZ>, 
-		Eigen::aligned_allocator<pcl::PlanarRegion<pcl::PointXYZ>>> regions;
+	model_p->setAxis(xAxis);
+	model_p->setEpsAngle(pcl::deg2rad(15.0));
+	
+	std::vector <int> inliers;
+	pcl::RandomSampleConsensus<pcl::PointXYZ> ransac (model_p);
+	ransac.setDistanceThreshold(50);
+	ransac.computeModel(2);
+	ransac.getInliers(inliers);
 
-	mps.segmentAndRefine(regions);
+	Eigen::VectorXf mCoeffs;
+	ransac.getModelCoefficients(mCoeffs);
 
-	std::vector<pcl::ModelCoefficients> coeff;
+	std::cout << mCoeffs.size() << std::endl;
+	std::cout << "Inliers size: " << inliers.size() << std::endl;
 
-	for (size_t i = 0; i < regions.size(); ++i)
+	// TODO: Get smallest and largest inliers for each axis and return corners for plane
+
+	for (int i = 0; i < mCoeffs.size(); ++i)
 	{
-		Eigen::Vector3f centroid = regions[i].getCentroid();
-		Eigen::Vector4f model = regions[i].getCoefficients();
-
-		pcl::ModelCoefficients co;
-		co.values.push_back(model[0]);
-		co.values.push_back(model[1]);
-		co.values.push_back(model[2]);
-		co.values.push_back(model[3]);
-		coeff.push_back(co);
-
-		pcl::PointCloud<pcl::PointXYZ> boundary_cloud;
-		boundary_cloud.points = regions[i].getContour();
-
-		printf ("Centroid: (%f, %f, %f)\n  Coefficients: (%f, %f, %f, %f)\n Inliers: %d\n",
-			centroid[0], centroid[1], centroid[2],
-			model[0], model[1], model[2], model[3],
-			boundary_cloud.points.size ());
+		std::cout << mCoeffs[i] << ", ";
 	}
 
+	std::cout << std::endl;
+
+	std::vector<pcl::ModelCoefficients> coeff;
 	return coeff;
 }
 

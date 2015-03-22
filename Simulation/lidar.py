@@ -74,7 +74,6 @@ def rotateLidar(object, angle):
     
     object.select = True
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
-    #bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
     
 def correctLidarRotation(lidar, ref):
     print("Correcting rotation")
@@ -185,6 +184,7 @@ def main():
     
     #roverBase.constraints.new(type="CLAMP_TO")
     #roverBase.constraints["Clamp To"].target = roverPath
+    #roverBase.constraints["Clamp To"].use_cyclic = True
     
     # /////////////////////////////////////////
     imu_file = createUniqueFile("imu", ".txt")
@@ -246,6 +246,8 @@ def main():
             
         rotateLidar(object, lidar_spin_speed * (timestamp - prev_timestamp))
         moveRover(roverBase, rover_speed * (timestamp - prev_timestamp))
+        print ("Position: ", imuPos.location)
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
             
         #print("Time: ", timestamp)
         #print ("Q: ", imuObj.matrix_world.to_quaternion())

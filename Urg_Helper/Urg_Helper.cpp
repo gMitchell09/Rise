@@ -231,6 +231,11 @@ void Urg_Helper::keyPress (const pcl::visualization::KeyboardEvent &ev)
 		this->ExportPointCloud("C:\\Users\\George\\Desktop\\Test.ply", std::move(fw));
 		std::cout << "Saved!" << std::endl;
 	}
+
+	else if (ev.getKeyCode() == 'm' && ev.keyDown)
+	{
+		CloudMeshAdapter::PlaneDetection(cloud);
+	}
 }
 
 bool Urg_Helper::ExportPointCloud(std::string filename, std::unique_ptr<pcl::FileWriter> fw)
