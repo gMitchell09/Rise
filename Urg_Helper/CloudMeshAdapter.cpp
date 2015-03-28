@@ -23,14 +23,14 @@
 #include <iostream>
 
 pcl::PolygonMesh::ConstPtr 
-CloudMeshAdapter::GetMeshFromCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
+CloudMeshAdapter::GetMeshFromCloud(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)
 {
 	std::cout << "Inside" << std::endl;
-	pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
+	pcl::NormalEstimation<pcl::PointXYZRGB, pcl::Normal> n;
 	std::cout << "-4" << std::endl;
 	pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
 	std::cout << "-3" << std::endl;
-	pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+	pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGB>);
 	std::cout << "-2" << std::endl;
 	tree->setInputCloud (cloud);
 	std::cout << "-1" << std::endl;
@@ -42,15 +42,15 @@ CloudMeshAdapter::GetMeshFromCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr clou
 
 	std::cout << "1" << std::endl;
 
-	pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals (new pcl::PointCloud<pcl::PointNormal>);
+	pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud_with_normals (new pcl::PointCloud<pcl::PointXYZRGBNormal>);
 	pcl::concatenateFields (*cloud, *normals, *cloud_with_normals);
 
 	std::cout << "2" << std::endl;
 
-	pcl::search::KdTree<pcl::PointNormal>::Ptr tree2 (new pcl::search::KdTree<pcl::PointNormal>);
+	pcl::search::KdTree<pcl::PointXYZRGBNormal>::Ptr tree2 (new pcl::search::KdTree<pcl::PointXYZRGBNormal>);
 	tree2->setInputCloud(cloud_with_normals);
 
-	pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
+	pcl::GreedyProjectionTriangulation<pcl::PointXYZRGBNormal> gp3;
 	pcl::PolygonMesh::Ptr triangles(new pcl::PolygonMesh());
 
 	std::cout << "3" << std::endl;
@@ -79,13 +79,13 @@ CloudMeshAdapter::GetMeshFromCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr clou
 	return pcl::PolygonMesh::ConstPtr(triangles);
 }
 
-pcl::ModelCoefficients CloudMeshAdapter::GetPlanesFromCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
+pcl::ModelCoefficients CloudMeshAdapter::GetPlanesFromCloud(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)
 {
 	pcl::ModelCoefficients::Ptr coeff (new pcl::ModelCoefficients);
 	pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
 
 	// Create segmentation object
-	pcl::SACSegmentation<pcl::PointXYZ> seg;
+	pcl::SACSegmentation<pcl::PointXYZRGB> seg;
 	// optional
 	seg.setOptimizeCoefficients(true);
 	// mandatory
@@ -106,15 +106,15 @@ pcl::ModelCoefficients CloudMeshAdapter::GetPlanesFromCloud(pcl::PointCloud<pcl:
 	return *coeff;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr CloudMeshAdapter::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr CloudMeshAdapter::PassThroughFilter(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 {
 
 	double passFilterXMin = -30000, passFilterXMax = 30000;
 	double passFilterYMin = -30000, passFilterYMax = 30000;
-	pcl::PointCloud<pcl::PointXYZ>::Ptr outCloud(new pcl::PointCloud<pcl::PointXYZ>());
-	pcl::PointCloud<pcl::PointXYZ>::Ptr outCloudInt(new pcl::PointCloud<pcl::PointXYZ>());
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr outCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr outCloudInt(new pcl::PointCloud<pcl::PointXYZRGB>());
 
-	pcl::PassThrough<pcl::PointXYZ> pass;
+	pcl::PassThrough<pcl::PointXYZRGB> pass;
 	pass.setInputCloud (cloud);
 	pass.setFilterFieldName ("x");
 	pass.setFilterLimits (passFilterXMin, passFilterXMax);
@@ -133,13 +133,13 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr CloudMeshAdapter::PassThroughFilter(pcl::Poi
 	return outCloud;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr CloudMeshAdapter::StatisticOutlierRemovalFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr CloudMeshAdapter::StatisticOutlierRemovalFilter(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 {
 	double outlierMeanK = 10;
 	double outlierStddevMulThresh = 10;
-	pcl::PointCloud<pcl::PointXYZ>::Ptr outCloud(new pcl::PointCloud<pcl::PointXYZ>());
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr outCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
 
-	pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+	pcl::StatisticalOutlierRemoval<pcl::PointXYZRGB> sor;
 	sor.setInputCloud(cloud);
 	sor.setMeanK(outlierMeanK);
 	sor.setStddevMulThresh(outlierStddevMulThresh);
@@ -148,12 +148,12 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr CloudMeshAdapter::StatisticOutlierRemovalFil
 	return outCloud;
 }
 
-std::vector<pcl::ModelCoefficients> CloudMeshAdapter::UnorganizedPlaneDetection(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
+std::vector<pcl::ModelCoefficients> CloudMeshAdapter::UnorganizedPlaneDetection(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)
 {
 	std::vector<pcl::ModelCoefficients> coeff;
 	//// First we will apply a VoxelGrid filter to our point cloud to eliminate the reduntant points
-	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>());
-	//pcl::VoxelGrid<pcl::PointXYZ> sor;
+	//pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZRGB>());
+	//pcl::VoxelGrid<pcl::PointXYZRGB> sor;
 	//sor.setInputCloud(cloud);
 	//sor.setLeafSize(10, 10, 10); // set leaf size to 1cm
 	//sor.filter (*cloud_filtered);
@@ -163,14 +163,14 @@ std::vector<pcl::ModelCoefficients> CloudMeshAdapter::UnorganizedPlaneDetection(
 	//pcl::PointIndices::Ptr inliers (new pcl::PointIndices());
 
 	//// Create segmentation object
-	//pcl::SACSegmentation<pcl::PointXYZ> seg;
+	//pcl::SACSegmentation<pcl::PointXYZRGB> seg;
 	//seg.setOptimizeCoefficients(true);
 	//seg.setModelType (pcl::SACMODEL_PLANE);
 	//seg.setMethodType(pcl::SAC_RANSAC);
 	//seg.setMaxIterations(1000);
 	//seg.setDistanceThreshold(10);
 
-	//pcl::ExtractIndices<pcl::PointXYZ> extract;
+	//pcl::ExtractIndices<pcl::PointXYZRGB> extract;
 
 	//int i=0, nr_points = (int)cloud_filtered->points.size();
 	//while (cloud_filtered->points.size() > 0.3 * nr_points)
@@ -199,33 +199,25 @@ std::vector<pcl::ModelCoefficients> CloudMeshAdapter::UnorganizedPlaneDetection(
 	return coeff;
 }
 
-std::vector<pcl::ModelCoefficients> CloudMeshAdapter::PlaneDetection(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
+std::vector<pcl::ModelCoefficients> 
+	CloudMeshAdapter::PlaneDetection(
+		pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+		Eigen::Vector3f axis)
 {
 	std::cout << "Plane detection" << std::endl;
-	//pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
-	//pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
-	//pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
-	//tree->setInputCloud (cloud);
-	//n.setInputCloud (cloud);
-	//n.setSearchMethod (tree);
-	//n.setKSearch (20);
-	//n.compute (*normals);
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_p (new pcl::PointCloud<pcl::PointXYZRGB>);
 
-	pcl::SampleConsensusModelPerpendicularPlane<pcl::PointXYZ>::Ptr model_p(
-		new pcl::SampleConsensusModelPerpendicularPlane<pcl::PointXYZ>(cloud));
-	Eigen::Vector3f xAxis(0, 1, 1);
-	Eigen::Vector3f yAxis(1, 0, 1);
-	Eigen::Vector3f zAxis(1, 1, 0);
-	Eigen::Vector3f nxAxis(0, -1, -1);
-	Eigen::Vector3f nyAxis(-1, 0, -1);
-	Eigen::Vector3f nzAxis(-1, -1, 0);
 
-	model_p->setAxis(xAxis);
-	model_p->setEpsAngle(pcl::deg2rad(15.0));
+	pcl::SampleConsensusModelPerpendicularPlane<pcl::PointXYZRGB>::Ptr model_p(
+		new pcl::SampleConsensusModelPerpendicularPlane<pcl::PointXYZRGB>(cloud));
+
+	model_p->setAxis(axis);
+	model_p->setEpsAngle(pcl::deg2rad(7.5));
 	
 	std::vector <int> inliers;
-	pcl::RandomSampleConsensus<pcl::PointXYZ> ransac (model_p);
+	pcl::RandomSampleConsensus<pcl::PointXYZRGB> ransac (model_p);
 	ransac.setDistanceThreshold(50);
+	ransac.setMaxIterations(10);
 	ransac.computeModel(2);
 	ransac.getInliers(inliers);
 
@@ -235,7 +227,46 @@ std::vector<pcl::ModelCoefficients> CloudMeshAdapter::PlaneDetection(pcl::PointC
 	std::cout << mCoeffs.size() << std::endl;
 	std::cout << "Inliers size: " << inliers.size() << std::endl;
 
+	std::vector<pcl::ModelCoefficients> coeff;
+
+	if (inliers.size() == 0) return coeff;
+
 	// TODO: Get smallest and largest inliers for each axis and return corners for plane
+
+	float min_x = std::numeric_limits<float>::max(), 
+		min_y = std::numeric_limits<float>::max(), 
+		min_z = std::numeric_limits<float>::max(), 
+		max_x = std::numeric_limits<float>::min(), 
+		max_y = std::numeric_limits<float>::min(), 
+		max_z = std::numeric_limits<float>::min();
+
+	for (auto itr = inliers.begin(); itr != inliers.end(); ++itr)
+	{
+		pcl::PointXYZRGB pt = cloud->points[*itr];
+		if (pt.x < min_x) min_x = pt.x;
+		if (pt.x > max_x) max_x = pt.x;
+		if (pt.y < min_y) min_y = pt.y;
+		if (pt.y > max_y) max_y = pt.y;
+		if (pt.z < min_z) min_z = pt.z;
+		if (pt.z > max_z) max_z = pt.z;
+		cloud->points[*itr].b = 0;
+	}
+
+	pcl::PointIndices::Ptr indices (new pcl::PointIndices());
+	indices->indices = inliers;
+
+	pcl::ExtractIndices<pcl::PointXYZRGB> extract;
+	extract.setNegative(true);
+	extract.setInputCloud(cloud);
+	extract.setIndices(indices);
+	extract.filter(*cloud_p);
+	
+	cloud->swap(*cloud_p);
+
+	std::cout << "Limits: " << std::endl;
+	std::cout << "X: " << min_x << " - " << max_x << std::endl;
+	std::cout << "Y: " << min_y << " - " << max_y << std::endl;
+	std::cout << "Z: " << min_z << " - " << max_z << std::endl;
 
 	for (int i = 0; i < mCoeffs.size(); ++i)
 	{
@@ -244,11 +275,10 @@ std::vector<pcl::ModelCoefficients> CloudMeshAdapter::PlaneDetection(pcl::PointC
 
 	std::cout << std::endl;
 
-	std::vector<pcl::ModelCoefficients> coeff;
 	return coeff;
 }
 
-void CloudMeshAdapter::FlattenCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud3d, pcl::PointCloud<pcl::PointXYZL>::Ptr grid2d, size_t cellWidth)
+void CloudMeshAdapter::FlattenCloud(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud3d, pcl::PointCloud<pcl::PointXYZRGBL>::Ptr grid2d, size_t cellWidth)
 {
 	// steps:
 	//    Iterate over grid with cells ranging from (x, y) to (x + cellWidth, y + cellWidth) and grab all points with any Z-value.

@@ -26,7 +26,7 @@ TravelGrid::~TravelGrid()
 {
 }
 
-TravelGrid::Cell::CellTypes TravelGrid::Cell::classify_cell(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
+TravelGrid::Cell::CellTypes TravelGrid::Cell::classify_cell(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)
 {
 	float floorHeightGuess = -3.0;
 	float ceilingHeightGuess = 3.0;

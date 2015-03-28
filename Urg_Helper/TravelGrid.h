@@ -20,7 +20,7 @@ public:
 
 		CellTypes cellType;
 
-		CellTypes classify_cell(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
+		CellTypes classify_cell(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud);
 	};
 
 	struct CellPoint {
@@ -43,12 +43,12 @@ private:
 	std::map<CellPoint, Cell, CellPoint> grid;
 };
 
-pcl::PointCloud<pcl::PointXYZ>::ConstPtr points_in_range(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud, float x_start, float x_end, float y_start, float y_end)
+pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr points_in_range(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud, float x_start, float x_end, float y_start, float y_end)
 {
-	pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud2(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr filteredCloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr filteredCloud2(new pcl::PointCloud<pcl::PointXYZRGB>);
 
-	pcl::PassThrough<pcl::PointXYZ> filter;
+	pcl::PassThrough<pcl::PointXYZRGB> filter;
 	filter.setInputCloud(cloud);
 	filter.setFilterFieldName("x");
 	filter.setFilterLimits(x_start, x_end);

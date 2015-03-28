@@ -24,9 +24,9 @@ public:
 	PointXYZ Rotate(const Quaternion& quat);
 	PointXYZ Cross(PointXYZ other);
 
-	operator pcl::PointXYZ() const
+	operator pcl::PointXYZRGB() const
 	{
-		pcl::PointXYZ point;
+		pcl::PointXYZRGB point;
 		point.x = this->x;
 		point.y = this->y;
 		point.z = this->z;

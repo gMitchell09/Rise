@@ -33,7 +33,7 @@
 //Contructor that intiates both a the pointcloud and the drvier for the lidar
 Urg_Helper::Urg_Helper() : 
 	_visualizer(new pcl::visualization::PCLVisualizer("Cloud")),
-	cloud(new pcl::PointCloud <pcl::PointXYZ>()),
+	cloud(new pcl::PointCloud <pcl::PointXYZRGB>()),
 	urg(std::unique_ptr<qrk::Urg_driver>(new qrk::Urg_driver())),
 	_updateMutex(std::unique_ptr<std::mutex> (new std::mutex()))
 {}
@@ -46,15 +46,15 @@ Urg_Helper::~Urg_Helper()
 	this->urg->close();
 }
 //This function takes each point input and cnoverts it into a 3D point. using the scanNo from the URG a radius and the phi angle
-pcl::PointXYZ Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, Common::PointXYZ roverPos)
+pcl::PointXYZRGB Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, Common::PointXYZ roverPos)
 {
 	//Creates a pcl point object to store the 3D data.
-	pcl::PointXYZ temp;
+	pcl::PointXYZRGB temp;
 	// gets the theta angle from the urg function that converts the scan number into an angle in radians.
 	double theta = urg->index2rad(ScanNo);
 
 	// First convert polar coordinates (r, theta coming straight from LIDAR)
-	pcl::PointXYZ lidarCart;
+	pcl::PointXYZRGB lidarCart;
 	lidarCart.x = 0;
 	lidarCart.y = static_cast<float>(cos(theta) * radius);
 	lidarCart.z = static_cast<float>(sin(theta) * radius);
@@ -67,6 +67,10 @@ pcl::PointXYZ Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, Commo
 	temp.x += roverPos.x;
 	temp.y += roverPos.y;
 	temp.z += roverPos.z;
+
+	temp.r = 255;
+	temp.g = 255;
+	temp.b = 255;
 
 	return temp;
 }
@@ -120,7 +124,7 @@ bool Urg_Helper::GetScanFromUrg()
 	for (int i = 0; i < data.size(); i++)
 	{
 		if (!isfinite(data[i])) continue;
-		pcl::PointXYZ tempPoint = CreatePoint(i, data[i], rotation, pos.GetPoint());
+		pcl::PointXYZRGB tempPoint = CreatePoint(i, data[i], rotation, pos.GetPoint());
 		cloud->push_back(tempPoint);
 	}
 
@@ -140,7 +144,7 @@ bool Urg_Helper::StartCloudVisualization()
 	if (!cloud->empty())
 	{
 		pcl::visualization::CloudViewer cloudviewer("Cloud");
-		cloudviewer.showCloud(pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud));
+		cloudviewer.showCloud(pcl::PointCloud <pcl::PointXYZRGB>::Ptr(cloud));
 		// Visualization stops after a short time, this loop keeps it going.
 		while (!cloudviewer.wasStopped ())
 		{
@@ -178,19 +182,19 @@ bool Urg_Helper::StartPCLVisualizer()
 	//cloud = CloudMeshAdapter::StatisticOutlierRemovalFilter(cloud->makeShared());
 	//std::vector<pcl::ModelCoefficients> planes = CloudMeshAdapter::PlaneDetection(cloud->makeShared());
 
-	//_visualizer->addPointCloud<pcl::PointXYZ> (cloud->makeShared(), "input cloud");
+	//_visualizer->addPointCloud<pcl::PointXYZRGB> (cloud->makeShared(), "input cloud");
 
 	//for (int x = -1000; x < 1000; x+=100)
 	//{
 	//	for (int y = -1000; y < 1000; y+=100)
 	//	{
-	//		pcl::PointXYZRGB a(128, 128, 0);
-	//		pcl::PointXYZRGB b(128, 128, 0);
+	//		pcl::PointXYZRGBRGB a(128, 128, 0);
+	//		pcl::PointXYZRGBRGB b(128, 128, 0);
 	//		a.x = b.x = x;
 	//		a.y = b.y = y;
 	//		a.z = b.z = 0;
 	//		std::string id = "Line: " + std::to_string(x) + "," + std::to_string(y);
-	//		_visualizer->addLine<pcl::PointXYZRGB>(a, b, id);
+	//		_visualizer->addLine<pcl::PointXYZRGBRGB>(a, b, id);
 	//		_visualizer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 30, id);
 	//	}
 	//}
@@ -206,9 +210,9 @@ bool Urg_Helper::StartPCLVisualizer()
 	_visualizer->registerKeyboardCallback(f);
 	while (!_visualizer->wasStopped())
 	{
-		if (!_visualizer->updatePointCloud(pcl::PointCloud <pcl::PointXYZ>::ConstPtr(cloud), "input cloud"))
+		if (!_visualizer->updatePointCloud(pcl::PointCloud <pcl::PointXYZRGB>::ConstPtr(cloud), "input cloud"))
 		{
-			_visualizer->addPointCloud<pcl::PointXYZ> (pcl::PointCloud <pcl::PointXYZ>::Ptr(cloud), "input cloud");
+			_visualizer->addPointCloud<pcl::PointXYZRGB> (pcl::PointCloud <pcl::PointXYZRGB>::Ptr(cloud), "input cloud");
 			_visualizer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "input cloud");
 		}
 
@@ -223,6 +227,11 @@ void Urg_Helper::keyPress (const pcl::visualization::KeyboardEvent &ev)
 {
 	std::cout << "Key: " << ev.getKeySym() << " : " << ev.getKeyCode() << std::endl;
 	std::cout << "Mod: " << ev.isAltPressed() << ", " << ev.isCtrlPressed() << ", " << ev.isShiftPressed() << std::endl;
+
+	Eigen::Vector3f xAxis(1, 0, 0);
+	Eigen::Vector3f yAxis(0, 1, 0);
+	Eigen::Vector3f zAxis(0, 0, 1);
+
 	if (ev.getKeyCode() == 's')
 	{
 		std::unique_ptr<pcl::FileWriter> fw (new pcl::PLYWriter());
@@ -231,10 +240,17 @@ void Urg_Helper::keyPress (const pcl::visualization::KeyboardEvent &ev)
 		this->ExportPointCloud("C:\\Users\\George\\Desktop\\Test.ply", std::move(fw));
 		std::cout << "Saved!" << std::endl;
 	}
-
-	else if (ev.getKeyCode() == 'm' && ev.keyDown)
+	else if (ev.getKeyCode() == 'b' && ev.keyDown())
 	{
-		CloudMeshAdapter::PlaneDetection(cloud);
+		CloudMeshAdapter::PlaneDetection(cloud, xAxis);
+	}
+	else if (ev.getKeyCode() == 'n' && ev.keyDown())
+	{
+		CloudMeshAdapter::PlaneDetection(cloud, yAxis);
+	}
+	else if (ev.getKeyCode() == 'm' && ev.keyDown())
+	{
+		CloudMeshAdapter::PlaneDetection(cloud, zAxis);
 	}
 }
 
