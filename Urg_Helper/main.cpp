@@ -1,5 +1,7 @@
 #include "Urg_Helper.h"
 #include "Urg_Helper.Mock.h"
+#include <cstdio>
+#include <cstdlib>
 
 int main()
 {

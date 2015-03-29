@@ -3,6 +3,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/passthrough.h>
+#include <pcl/filters/extract_indices.h>
 
 #include <memory> // for std:: smart pointers
 #include <map>
@@ -19,8 +20,6 @@ public:
 		};
 
 		CellTypes cellType;
-
-		CellTypes classify_cell(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud);
 	};
 
 	struct CellPoint {
@@ -33,6 +32,13 @@ public:
 	};
 
 	static const size_t cell_size;
+	pcl::IndicesPtr points_in_range(float x_start, float x_end, float y_start, float y_end);
+	Cell::CellTypes classify_cell(pcl::IndicesPtr indices);
+	
+	void setInputCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
+	{
+		this->cloud = cloud;
+	}
 
 	TravelGrid();
 	~TravelGrid();
@@ -41,23 +47,5 @@ public:
 
 private:
 	std::map<CellPoint, Cell, CellPoint> grid;
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
 };
-
-pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr points_in_range(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud, float x_start, float x_end, float y_start, float y_end)
-{
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr filteredCloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr filteredCloud2(new pcl::PointCloud<pcl::PointXYZRGB>);
-
-	pcl::PassThrough<pcl::PointXYZRGB> filter;
-	filter.setInputCloud(cloud);
-	filter.setFilterFieldName("x");
-	filter.setFilterLimits(x_start, x_end);
-	filter.filter(*filteredCloud);
-
-	filter.setInputCloud(filteredCloud);
-	filter.setFilterFieldName("y");
-	filter.setFilterLimits(y_start, y_end);
-	filter.filter(*filteredCloud2);
-
-	return filteredCloud2->makeShared();
-}

@@ -13,6 +13,7 @@
 #include "Quaternion_Common.h"
 #include "Point_Common.h"
 #include "CloudMeshAdapter.h"
+#include "TravelGrid.h"
 
 #include <thread>
 #include <mutex>
@@ -251,6 +252,43 @@ void Urg_Helper::keyPress (const pcl::visualization::KeyboardEvent &ev)
 	else if (ev.getKeyCode() == 'm' && ev.keyDown())
 	{
 		CloudMeshAdapter::PlaneDetection(cloud, zAxis);
+	}
+	else if (ev.getKeyCode() == 'p' && ev.keyDown())
+	{
+		TravelGrid tg;
+		tg.setInputCloud(this->cloud);
+		
+		pcl::IndicesPtr indices = tg.points_in_range(0, 1000, 0, 1000);
+		TravelGrid::Cell::CellTypes cellType = tg.classify_cell(indices);
+
+		uint8_t r = 0;
+		uint8_t g = 0;
+		uint8_t b = 255;
+
+		switch (cellType)
+		{
+		case TravelGrid::Cell::CellTypes::kUndefined:
+			break;
+		case TravelGrid::Cell::CellTypes::kFloor:
+			r = b = 0;
+			g = 255;
+			break;
+		case TravelGrid::Cell::CellTypes::kWall:
+			r = 255;
+			g = b = 0;
+			break;
+		case TravelGrid::Cell::CellTypes::kStairs:
+			r = g = 255;
+			b = 0;
+			break;
+		}
+
+		for (auto itr = indices->begin(); itr != indices->end(); ++itr)
+		{
+			this->cloud->points[*itr].r = r;
+			this->cloud->points[*itr].g = g;
+			this->cloud->points[*itr].b = b;
+		}
 	}
 }
 
