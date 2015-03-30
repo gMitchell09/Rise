@@ -34,47 +34,43 @@ namespace Common
 
 	void IMU::readQuaternion()
 	{
-		while (_waiting);
+		while (_waiting) std::this_thread::yield();
 		while (_running)
 		{
 			long timeout = 100;
-			char receivedTime[1024];
-			long imu_time;
 			Quaternion q;
 
 			if (!_isSendingQuatData)
 			{
 				_imuSerial->WriteData("1", 1);
 				_isSendingQuatData = true;
+				Sleep(50);
 			}
 
-			// clean off buffer
-			while (_imuSerial->Pop() != '~' && timeout >= 0) 
+			Serial::Packet p;
+			while (p.type != Serial::PacketTypes::kQuaternion && timeout > 0)
 			{
-				Sleep(3);
-				timeout -= 3;
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				timeout -= 10;
+				p = _imuSerial->GetPacket(Serial::PacketTypes::kQuaternion);
 			}
 
-			if (timeout < 0) continue;
-		
-			int bytesRead = _imuSerial->ReadToChar(receivedTime, 'D', 1024);
-			if (bytesRead <= 0) continue;
-			receivedTime[bytesRead] = '\0';
-			imu_time = atol(receivedTime);
-			if (imu_time == 0) continue;
+			if (p.type != Serial::PacketTypes::kQuaternion)
+			{
+				std::this_thread::yield();
+				continue;
+			}
 
-			bytesRead = _imuSerial->ReadToChar(receivedTime, 'E', 1024);
+			assert(p.length == sizeof(float));
 
-			if (bytesRead < 16) continue; // discard partial reads
-
-			q.x = ((float*)receivedTime)[0];
-			q.y = ((float*)receivedTime)[1];
-			q.z = ((float*)receivedTime)[2];
-			q.w = ((float*)receivedTime)[3];
+			q.x = ((float*)p.data)[0];
+			q.y = ((float*)p.data)[1];
+			q.z = ((float*)p.data)[2];
+			q.w = ((float*)p.data)[3];
 
 			Quaternion_Time qt;
 			qt.q = q;
-			qt.timestamp = imu_time;
+			qt.timestamp = p.timestamp;
 
 			_queueLock->lock();
 			_positionHistory.push(qt);
@@ -90,26 +86,23 @@ namespace Common
 		if (_isSendingQuatData)
 			return -1;
 
-		char receivedTime[1024];
 		long timeout = 1000;
 
 		_imuSerial->WriteData("T", 1);
 		Sleep(50);
-		char c = _imuSerial->Pop();
-		while (c != 'T')
+		Serial::Packet p;
+		while (p.type != Serial::PacketTypes::kTimeStamp && timeout > 0)
 		{
-			if (timeout < 0) return -1;
-			Sleep(10);
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			timeout -= 10;
-			c = _imuSerial->Pop();
-			if (timeout % 100) _imuSerial->WriteData("T", 1);
+			p = _imuSerial->GetPacket(Serial::PacketTypes::kTimeStamp);
 		}
-		int read_d = _imuSerial->ReadToChar(receivedTime, 'E', 1024);
-		receivedTime[read_d] = '\0';
+
+		if (p.type != Serial::PacketTypes::kTimeStamp) throw "Could not get timestamp";
 
 		_waiting = false;
-		std::cout << "Timestamp: " << receivedTime << std::endl;
-		return atol(receivedTime);
+		std::cout << "Timestamp: " << p.timestamp << std::endl;
+		return p.timestamp;
 	}
 
 	bool IMU::isHistoryEmpty()

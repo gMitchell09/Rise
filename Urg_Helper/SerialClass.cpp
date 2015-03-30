@@ -1,16 +1,114 @@
 #include "Stdafx.h"
 #include "SerialClass.h"
 
-Serial::Serial() {}
+Serial::Serial() :
+	_running(true),
+	_packetLock(std::unique_ptr<std::mutex>(new std::mutex())),
+	_packetThread(std::bind(&Serial::_packetizeMeCapn, this))
+{}
 
-Serial::Serial(LPCSTR portName)
+Serial::Serial(LPCSTR portName) :
+	_running(true),
+	_packetLock(std::unique_ptr<std::mutex>(new std::mutex())),
+	_packetThread(std::bind(&Serial::_packetizeMeCapn, this))
 {
     _init(portName);
 }
 
-Serial::Serial(std::string portName)
+Serial::Serial(std::string portName) :
+	_running(true),
+	_packetLock(std::unique_ptr<std::mutex>(new std::mutex())),
+	_packetThread(std::bind(&Serial::_packetizeMeCapn, this))
+
 {
 	_init((LPCSTR)portName.c_str());
+}
+
+void Serial::_packetizeMeCapn()
+{
+	while (!this->IsConnected())
+	{
+		std::this_thread::yield();
+	}
+	while (_running)
+	{
+		unsigned char token;
+		Packet p;
+		// FORGIVE ME.  STATE MACHINES <3 GOTO + LABELS
+
+Start_State:
+		while ((token = this->Pop()) != START_TOKEN)
+		{
+			if (token == EOF) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+
+Timestamp_State:
+		char ts_c[sizeof(unsigned long)];
+		unsigned int curPos = 0;
+
+		while ((token = this->Pop()) != TYPE_TOKEN)
+		{
+			if (token == EOF) 
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			//if (token < '0' || token > '9') goto Start_State;
+			if (curPos >= sizeof(unsigned long)) goto Start_State;
+			ts_c[curPos++] = token;
+		}
+
+		// Now cast ts_c
+		p.timestamp = *((unsigned long *)ts_c);
+
+Type_State:
+		while ((token = this->Pop()) != LENGTH_TOKEN)
+		{
+			if (token == EOF) 
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+
+			// TODO: Fix this
+			if (token != (char)PacketTypes::kQuaternion &&
+				token != (char)PacketTypes::kTimeStamp) goto Start_State;
+			p.type = (PacketTypes)token;
+		}
+Length_State:
+		while ((token = this->Pop()) != DATA_TOKEN)
+		{
+			if (token == EOF) 
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			p.length = token;
+		}
+Data_State:
+		unsigned char length = p.length;
+		unsigned char* data = (unsigned char*)malloc(length);
+		curPos = 0;
+		while (curPos < length)
+		{
+			token = this->Pop();
+			if (token == EOF)
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			if (token == END_TOKEN) goto Start_State;
+
+			data[curPos++] = token;
+		}
+
+		p.data = data;
+
+		// DONE
+		_packetLock->lock();
+		_packetMap[p.type].push(p);
+		_packetLock->unlock();
+	}
 }
 
 void Serial::_init(LPCSTR portName)
@@ -231,3 +329,22 @@ bool Serial::IsConnected()
     return this->connected;
 }
 
+Serial::Packet Serial::GetPacket(Serial::PacketTypes type)
+{
+	Packet p;
+	if (_packetMap[type].empty()) return p;
+	
+	_packetLock->lock();
+	
+	p = _packetMap[type].front();
+	_packetMap[type].pop();
+
+	_packetLock->unlock();
+
+	return p;
+}
+
+bool Serial::SendPacket(Serial::Packet p)
+{
+	return true;
+}
