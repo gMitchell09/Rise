@@ -10,7 +10,8 @@ namespace Common
 {
 	IMU::IMU(std::shared_ptr<Serial> serial) :
 		_isSendingQuatData(false), 
-		_running(true), 
+		_running(true),
+		_waiting(true),
 		_imuSerial(serial), 
 		_queueLock(std::unique_ptr<std::mutex>(new std::mutex())),
 		_imuThread(std::bind(&IMU::readQuaternion, this))
@@ -33,6 +34,7 @@ namespace Common
 
 	void IMU::readQuaternion()
 	{
+		while (_waiting);
 		while (_running)
 		{
 			long timeout = 100;
@@ -54,7 +56,6 @@ namespace Common
 			}
 
 			if (timeout < 0) continue;
-
 		
 			int bytesRead = _imuSerial->ReadToChar(receivedTime, 'D', 1024);
 			if (bytesRead <= 0) continue;
@@ -85,6 +86,7 @@ namespace Common
 
 	long IMU::getTimeStamp()
 	{
+		std::cout << "Getting timestamp" << std::endl;
 		if (_isSendingQuatData)
 			return -1;
 
@@ -93,15 +95,20 @@ namespace Common
 
 		_imuSerial->WriteData("T", 1);
 		Sleep(50);
-		while (_imuSerial->Pop() != 'T')
+		char c = _imuSerial->Pop();
+		while (c != 'T')
 		{
 			if (timeout < 0) return -1;
 			Sleep(10);
 			timeout -= 10;
+			c = _imuSerial->Pop();
+			if (timeout % 100) _imuSerial->WriteData("T", 1);
 		}
-		int read_d = _imuSerial->ReadData(receivedTime, 1024);
+		int read_d = _imuSerial->ReadToChar(receivedTime, 'E', 1024);
 		receivedTime[read_d] = '\0';
 
+		_waiting = false;
+		std::cout << "Timestamp: " << receivedTime << std::endl;
 		return atol(receivedTime);
 	}
 

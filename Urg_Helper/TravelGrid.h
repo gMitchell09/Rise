@@ -32,8 +32,8 @@ public:
 	};
 
 	static const size_t cell_size;
-	pcl::IndicesPtr points_in_range(float x_start, float x_end, float y_start, float y_end);
-	Cell::CellTypes classify_cell(pcl::IndicesPtr indices);
+	pcl::PointIndices::Ptr points_in_range(float x_start, float x_end, float y_start, float y_end);
+	Cell::CellTypes classify_cell(pcl::PointIndices::Ptr indices);
 	
 	void setInputCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 	{

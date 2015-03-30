@@ -54,6 +54,7 @@ namespace Common
 		std::unique_ptr<std::mutex> _queueLock;
 		bool _isSendingQuatData;
 		std::atomic<bool> _running;
+		std::atomic<bool> _waiting;
 		std::thread _imuThread;
 	};
 }

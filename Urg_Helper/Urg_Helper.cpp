@@ -80,21 +80,24 @@ pcl::PointXYZRGB Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, Co
 bool Urg_Helper::ConnectToUrg()
 {
 	//If having trouble connecting change this port to the correct one for the LiDar
-	if (!urg->open("COM24", 115200, qrk::Urg_driver::Serial))
+	if (!urg->open("COM7", 115200, qrk::Urg_driver::Serial))
 	{
 		std::cout << "Could not connect to URG." << endl;
 		return false;
 	}
 	//Goes from 0 to 1080 wich is -135 degrees to +135
 	urg->set_scanning_parameter(0, 1080, 0);
-	//This port is for the arduino. Leave in the backslashes and periods.
 	try
 	{
-		std::shared_ptr<Serial> rotSerial = std::shared_ptr<Serial> (new Serial(std::string("\\\\.\\COM19")));
+		std::shared_ptr<Serial> rotSerial = std::shared_ptr<Serial> (new Serial(std::string("\\\\.\\COM4")));
 		_rotImu = std::shared_ptr<Common::IMU>(new Common::IMU(rotSerial));
 
-		std::shared_ptr<Serial> posSerial = std::shared_ptr<Serial> (new Serial(std::string("\\\\.\\COMXX")));
-		_posIMU = std::shared_ptr<Common::IMU>(new Common::IMU(posSerial));
+		Sleep(100);
+		long timestamp = _rotImu->getTimeStamp();
+		urg->set_sensor_time_stamp(timestamp);
+
+		//std::shared_ptr<Serial> posSerial = std::shared_ptr<Serial> (new Serial(std::string("\\\\.\\COMXX")));
+		//_posIMU = std::shared_ptr<Common::IMU>(new Common::IMU(posSerial));
 
 		urg->start_measurement(qrk::Urg_driver::Distance);
 		Sleep(2000);
@@ -119,8 +122,10 @@ bool Urg_Helper::GetScanFromUrg()
 	if (isnan(qt.x) || isnan(qt.y) || isnan(qt.z) || isnan(qt.w)) return false;
 	double rotation = qt.pitch();
 
-	Common::Quaternion pos = _posIMU->findTimestamp(timestamp);
-	if (isnan(pos.x) || isnan(pos.y) || isnan(pos.z)) return false;
+	//Common::Quaternion pos = _posIMU->findTimestamp(timestamp);
+	//if (isnan(pos.x) || isnan(pos.y) || isnan(pos.z)) return false;
+
+	Common::Quaternion pos = Common::Quaternion(0, 0, 0, 0);
 
 	for (int i = 0; i < data.size(); i++)
 	{
@@ -258,7 +263,7 @@ void Urg_Helper::keyPress (const pcl::visualization::KeyboardEvent &ev)
 		TravelGrid tg;
 		tg.setInputCloud(this->cloud);
 		
-		pcl::IndicesPtr indices = tg.points_in_range(0, 1000, 0, 1000);
+		pcl::PointIndices::Ptr indices = tg.points_in_range(0, 1000, 0, 1000);
 		TravelGrid::Cell::CellTypes cellType = tg.classify_cell(indices);
 
 		uint8_t r = 0;
@@ -283,7 +288,7 @@ void Urg_Helper::keyPress (const pcl::visualization::KeyboardEvent &ev)
 			break;
 		}
 
-		for (auto itr = indices->begin(); itr != indices->end(); ++itr)
+		for (auto itr = indices->indices.begin(); itr != indices->indices.end(); ++itr)
 		{
 			this->cloud->points[*itr].r = r;
 			this->cloud->points[*itr].g = g;
