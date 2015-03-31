@@ -22,8 +22,8 @@ class Serial
 {
 public:
 	enum class PacketTypes : char {
-		kQuaternion = 'Q',
-		kTimeStamp = 'T',
+		kQuaternion = 'q',
+		kTimeStamp = 't',
 	};
 
 	struct Packet {
@@ -32,9 +32,10 @@ public:
 		unsigned char length;
 		unsigned long timestamp;
 
-		~Packet() {
-			if (data != NULL) free(data);
-		}
+		// GO AHEAD AND LEAK YOU MOTHERFUCKING SON OF A BITCH
+		//~Packet() {
+		//	if (data != NULL) free(data);
+		//}
 
 		Packet() {
 			data = NULL;

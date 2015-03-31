@@ -8,16 +8,17 @@
 
 namespace Common
 {
-	IMU::IMU(std::shared_ptr<Serial> serial) :
+	IMU::IMU(std::shared_ptr<Serial> serial, bool syncRequired) :
 		_isSendingQuatData(false), 
 		_running(true),
-		_waiting(true),
+		_waiting(syncRequired),
+		_syncRequired(syncRequired),
 		_imuSerial(serial), 
 		_queueLock(std::unique_ptr<std::mutex>(new std::mutex())),
 		_imuThread(std::bind(&IMU::readQuaternion, this))
 	{
 		if (!_imuSerial->IsConnected())
-			throw "Could not connect to arduino";
+			throw std::exception("Could not connect to arduino");
 	}
 
 	IMU::~IMU()
@@ -47,7 +48,7 @@ namespace Common
 				Sleep(50);
 			}
 
-			Serial::Packet p;
+			Serial::Packet p = _imuSerial->GetPacket(Serial::PacketTypes::kQuaternion);
 			while (p.type != Serial::PacketTypes::kQuaternion && timeout > 0)
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -61,7 +62,10 @@ namespace Common
 				continue;
 			}
 
-			assert(p.length == sizeof(float));
+			if (p.length != 4 * sizeof(float))
+			{
+				assert(p.length == 4 * sizeof(float));
+			}
 
 			q.x = ((float*)p.data)[0];
 			q.y = ((float*)p.data)[1];
@@ -80,7 +84,7 @@ namespace Common
 		std::cout << "Finished IMU!!!" << std::endl;
 	}
 
-	long IMU::getTimeStamp()
+	long IMU::startCollecting()
 	{
 		std::cout << "Getting timestamp" << std::endl;
 		if (_isSendingQuatData)
@@ -98,7 +102,8 @@ namespace Common
 			p = _imuSerial->GetPacket(Serial::PacketTypes::kTimeStamp);
 		}
 
-		if (p.type != Serial::PacketTypes::kTimeStamp) throw "Could not get timestamp";
+		if (p.type != Serial::PacketTypes::kTimeStamp) 
+			throw std::exception("Could not get timestamp");
 
 		_waiting = false;
 		std::cout << "Timestamp: " << p.timestamp << std::endl;

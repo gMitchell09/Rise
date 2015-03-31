@@ -101,6 +101,18 @@ Data_State:
 
 			data[curPos++] = token;
 		}
+		while ((token = this->Pop()) != END_TOKEN)
+		{
+			if (token == EOF)
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			else
+			{
+				goto Start_State;
+			}
+		}
 
 		p.data = data;
 

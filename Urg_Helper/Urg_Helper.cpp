@@ -90,20 +90,21 @@ bool Urg_Helper::ConnectToUrg()
 	try
 	{
 		std::shared_ptr<Serial> rotSerial = std::shared_ptr<Serial> (new Serial(std::string("\\\\.\\COM4")));
-		_rotImu = std::shared_ptr<Common::IMU>(new Common::IMU(rotSerial));
+		_rotImu = std::shared_ptr<Common::IMU>(new Common::IMU(rotSerial, true));
 
 		Sleep(100);
-		long timestamp = _rotImu->getTimeStamp();
+		long timestamp = _rotImu->startCollecting();
 		urg->set_sensor_time_stamp(timestamp);
 
 		//std::shared_ptr<Serial> posSerial = std::shared_ptr<Serial> (new Serial(std::string("\\\\.\\COMXX")));
-		//_posIMU = std::shared_ptr<Common::IMU>(new Common::IMU(posSerial));
+		//_posIMU = std::shared_ptr<Common::IMU>(new Common::IMU(posSerial, false));
 
 		urg->start_measurement(qrk::Urg_driver::Distance);
 		Sleep(2000);
 	}
-	catch (...)
+	catch (std::exception& e)
 	{
+		std::cout << "Exception caught: " << e.what() << std::endl;
 		return false;
 	}
 	return true;

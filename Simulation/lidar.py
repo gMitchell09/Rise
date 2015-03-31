@@ -5,6 +5,8 @@ from mathutils import Vector
 from math import sqrt, pi, atan2
 from time import sleep, time
 from array import array
+
+import struct
 import sys
 import os
 
@@ -234,19 +236,31 @@ def main():
             quat = imuRot.matrix_world.to_quaternion()
             print ("Rot: ", imuRot.matrix_world.to_euler('XYZ'))
             floatArray = array('f', [quat.w, quat.x, quat.y, quat.z])
-            imu_file_string += bytes('~' + str(timestamp) + 'D', 'UTF-8') + floatArray.tobytes() + bytes('E', 'UTF-8')
+            imu_file_string += bytes('S', 'UTF-8') \
+             + struct.pack('L', timestamp) \
+             + bytes('TqL', 'UTF-8') \
+             + struct.pack('b', len(floatArray) * 4) \
+             + bytes('D', 'UTF-8') \
+             + floatArray.tobytes() \
+             + bytes('E', 'UTF-8')
             time_of_last_imu_read = timestamp
             
-        if (True or timestamp - time_of_last_imu_pos_read > time_between_imu_readings):
+        if (timestamp - time_of_last_imu_pos_read > time_between_imu_readings):
             quat = imu_pos_start - imuPos.location
-            print ("Pos: ", imuPos.location)
+            #print ("Pos: ", imuPos.location)
             floatArray = array('f', [0, quat.x, quat.y, quat.z])
-            imu_pos_file_string += bytes('~' + str(timestamp) + 'D', 'UTF-8') + floatArray.tobytes() + bytes('E', 'UTF-8')
+            imu_pos_file_string += bytes('S', 'UTF-8') \
+             + struct.pack('L', timestamp) \
+             + bytes('TqL', 'UTF-8') \
+             + struct.pack('b', len(floatArray) * 4) \
+             + bytes('D', 'UTF-8') \
+             + floatArray.tobytes() \
+             + bytes('E', 'UTF-8')
             time_of_last_imu_pos_read = timestamp
             
         rotateLidar(object, lidar_spin_speed * (timestamp - prev_timestamp))
-        moveRover(roverBase, rover_speed * (timestamp - prev_timestamp))
-        print ("Position: ", imuPos.location)
+        #moveRover(roverBase, rover_speed * (timestamp - prev_timestamp))
+        #print ("Position: ", imuPos.location)
         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
             
         #print("Time: ", timestamp)
@@ -265,6 +279,9 @@ def main():
     lidar_file.write(bytes('\x00\x00\x00\x00', 'UTF-8'))
     
     lidar_file.write(lidar_file_string)
+    
+    imu_timestamp_string = bytes('S\x00\x00\x00\x00TtL\x04D\x00\x00\x00\x00E', 'UTF-8')
+    imu_file.write(imu_timestamp_string)
     imu_file.write(imu_file_string)
     imu_pos_file.write(imu_pos_file_string)
     
