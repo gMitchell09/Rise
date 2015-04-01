@@ -45,7 +45,7 @@ namespace Common
 			{
 				_imuSerial->WriteData("1", 1);
 				_isSendingQuatData = true;
-				Sleep(50);
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
 
 			Serial::Packet p = _imuSerial->GetPacket(Serial::PacketTypes::kQuaternion);
@@ -76,6 +76,11 @@ namespace Common
 			qt.q = q;
 			qt.timestamp = p.timestamp;
 
+			std::cout << "Roll: " << q.roll();
+			std::cout << " Pitch: " << q.pitch();
+			std::cout << " Yaw: " << q.yaw();
+			std::cout << std::endl;
+
 			_queueLock->lock();
 			_positionHistory.push(qt);
 			_queueLock->unlock();
@@ -92,8 +97,7 @@ namespace Common
 
 		long timeout = 1000;
 
-		_imuSerial->WriteData("T", 1);
-		Sleep(50);
+		std::cout << _imuSerial->WriteData("T", 1) << std::endl;
 		Serial::Packet p;
 		while (p.type != Serial::PacketTypes::kTimeStamp && timeout > 0)
 		{

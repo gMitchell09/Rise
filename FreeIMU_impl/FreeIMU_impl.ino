@@ -1,6 +1,6 @@
 #define ARDUIMU_v3
 
-//#include <calibration.h>
+#include "calibration.h"
 #include <CommunicationUtils.h>
 #include <FreeIMU.h>
 #include <vector_math.h>
@@ -17,8 +17,6 @@
 
 //#define DEBUG
 #include "DebugUtils.h"
-#include "CommunicationUtils.h"
-#include "FreeIMU.h"
 #include <SPI.h>
 
 //#define I2CDEV_IMPLEMENTATION I2CDEV_ARDUINO_WIRE
@@ -26,6 +24,9 @@
 //SoftwareSerial serial(10, 11);
 FreeIMU IMU;
 bool outEnable = false;
+
+int send_binary (void* arg, unsigned int len);
+void send_timestamp();
 
 void setup()
 {
@@ -46,14 +47,20 @@ void loop()
     if (outEnable)
     {
       IMU.getQ(quat);
-      Serial.print('~');
-      Serial.print(millis());
+      Serial.print('S');
+      unsigned long timestamp = millis();
+      send_binary(&timestamp, sizeof(unsigned long));
+      Serial.print('T');
+      Serial.print('q');
+      Serial.print('L');
+      byte len = 4 * sizeof(float);
+      send_binary(&len, sizeof(unsigned byte));
       Serial.print('D');
-      send_float(quat[0]);
-      send_float(quat[1]);
-      send_float(quat[2]);
-      send_float(quat[3]);
-      Serial.print('E');      
+      send_binary(quat, sizeof(float));
+      send_binary(quat + 1, sizeof(float));
+      send_binary(quat + 2, sizeof(float));
+      send_binary(quat + 3, sizeof(float));
+      Serial.print('E');
       delay(10);
     }
     
@@ -65,10 +72,11 @@ void loop()
         case '1':
           outEnable = true;
           break;
+        case '0':
+          outEnable = false;
+          break;
         case 'T':
-          Serial.print('T');
-          Serial.print(millis());
-          Serial.print('E');
+          send_timestamp();
           break;
         default:
           break;
@@ -77,8 +85,24 @@ void loop()
   }
 }
 
-int send_float(float arg)
+void send_timestamp()
 {
-  byte * data = (byte*) &arg;
-  return Serial.write(data, sizeof(arg));
+  Serial.print('S');
+  unsigned long timestamp = millis();
+  send_binary(&timestamp, sizeof(unsigned long));
+  Serial.print('T');
+  Serial.print('t');
+  Serial.print('L');
+  byte len = sizeof(float);
+  send_binary(&len, sizeof(unsigned byte));
+  Serial.print('D');
+  float f = 0.0f;
+  send_binary(&f, sizeof(float));
+  Serial.print('E');
+}
+
+int send_binary (void* arg, unsigned int len)
+{
+  byte* data = (byte*)arg;
+  return Serial.write(data, len);
 }

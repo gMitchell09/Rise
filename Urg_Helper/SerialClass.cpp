@@ -3,12 +3,14 @@
 
 Serial::Serial() :
 	_running(true),
+	connected(false),
 	_packetLock(std::unique_ptr<std::mutex>(new std::mutex())),
 	_packetThread(std::bind(&Serial::_packetizeMeCapn, this))
 {}
 
 Serial::Serial(LPCSTR portName) :
 	_running(true),
+	connected(false),
 	_packetLock(std::unique_ptr<std::mutex>(new std::mutex())),
 	_packetThread(std::bind(&Serial::_packetizeMeCapn, this))
 {
@@ -17,6 +19,7 @@ Serial::Serial(LPCSTR portName) :
 
 Serial::Serial(std::string portName) :
 	_running(true),
+	connected(false),
 	_packetLock(std::unique_ptr<std::mutex>(new std::mutex())),
 	_packetThread(std::bind(&Serial::_packetizeMeCapn, this))
 
@@ -215,6 +218,7 @@ Serial::~Serial()
         //Close the serial handler
         CloseHandle(this->hSerial);
     }
+	_running = false;
 }
 
 char Serial::Pop()
@@ -332,7 +336,10 @@ bool Serial::WriteData(char *buffer, unsigned int nbChar)
         return false;
     }
     else
+	{
+		std::cout << "Bytes written: " << bytesSend << "/" << nbChar << std::endl;
         return true;
+	}
 }
 
 bool Serial::IsConnected()

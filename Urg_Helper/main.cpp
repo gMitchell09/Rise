@@ -7,7 +7,7 @@ int main()
 {
 	//Urg_Helper h;
 	//h.StartPCLVisualizer();
-	Urg_Helper_Mock uhm;
+	Urg_Helper uhm;
 	uhm.ConnectToUrg();
 	uhm.StartPCLVisualizer();
 	//uhm.StartCloudVisualization();
