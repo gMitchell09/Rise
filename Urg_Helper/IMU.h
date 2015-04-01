@@ -32,6 +32,11 @@ namespace Common
 
 		// User-facing queue side
 		bool isHistoryEmpty();
+		void clearHistory() {
+			_queueLock->lock();
+			while (!_positionHistory.empty()) _positionHistory.pop();
+			_queueLock->unlock();
+		}
 		Quaternion findTimestamp(long timeStamp);
 
 		void stopThread();
