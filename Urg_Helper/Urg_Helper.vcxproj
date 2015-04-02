@@ -87,6 +87,7 @@
     <ClInclude Include="CloudMeshAdapter.h" />
     <ClInclude Include="FakeUrg.h" />
     <ClInclude Include="IMU.h" />
+    <ClInclude Include="MovementHandler.h" />
     <ClInclude Include="Point_Common.h" />
     <ClInclude Include="Quaternion_Common.h" />
     <ClInclude Include="resource.h" />
@@ -106,6 +107,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MovementHandler.cpp" />
     <ClCompile Include="Point_Common.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>

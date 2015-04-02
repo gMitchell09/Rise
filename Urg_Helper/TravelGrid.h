@@ -6,6 +6,8 @@
 #include <pcl/filters/extract_indices.h>
 
 #include <memory> // for std:: smart pointers
+#include <thread>
+#include <mutex>
 #include <map>
 
 class TravelGrid
@@ -48,4 +50,7 @@ public:
 private:
 	std::map<CellPoint, Cell, CellPoint> grid;
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
+
+	std::thread _classificationThread;
+	std::unique_ptr<std::mutex> _mapLock;
 };

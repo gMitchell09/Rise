@@ -17,16 +17,16 @@ bool Urg_Helper_Mock::ConnectToUrg()
 	{
 		std::string userHome = std::string(std::getenv("USERPROFILE"));
 
-		std::shared_ptr<Serial_Mock> s = std::shared_ptr<Serial_Mock>(new Serial_Mock(userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\imu36.txt")));
-		_rotImu = std::shared_ptr<Common::IMU>(new Common::IMU(s, true));
+		std::shared_ptr<Serial_Mock> s = std::shared_ptr<Serial_Mock>(new Serial_Mock(userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\imu41.txt")));
+		_rotImu = std::shared_ptr<Common::IMU>(new Common::IMU(s, true, true));
 		_rotImu->startCollecting();
 
-		//std::shared_ptr<Serial_Mock> posIMUSerial = std::shared_ptr<Serial_Mock>(new Serial_Mock(userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\imu_pos36.txt")));
-		//_posIMU = std::shared_ptr<Common::IMU>(new Common::IMU(posIMUSerial, false));
+		//std::shared_ptr<Serial_Mock> posIMUSerial = std::shared_ptr<Serial_Mock>(new Serial_Mock(userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\imu_pos41.txt")));
+		//_posIMU = std::shared_ptr<Common::IMU>(new Common::IMU(posIMUSerial, false, true));
 
 		Sleep(1000); // sleep for 1s so IMU data can be processed...
 
-		std::string lidarPath = userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\lidar36.txt");
+		std::string lidarPath = userHome + std::string("\\Documents\\GitHub\\Rise\\Simulation\\lidar41.txt");
 
 		if (!urg->open(lidarPath.c_str()))
 		{

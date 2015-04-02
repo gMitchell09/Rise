@@ -24,7 +24,7 @@ namespace Common
 	class IMU
 	{
 	public:
-		IMU(std::shared_ptr<Serial> serial, bool syncRequired = true);
+		IMU(std::shared_ptr<Serial> serial, bool syncRequired = true, bool noWrite = false);
 
 		// thread-safe via mutex
 		void readQuaternion();
@@ -59,6 +59,7 @@ namespace Common
 		std::unique_ptr<std::mutex> _queueLock;
 		bool _isSendingQuatData;
 		bool _syncRequired;
+		bool _noWrite;
 		std::atomic<bool> _running;
 		std::atomic<bool> _waiting;
 		std::thread _imuThread;

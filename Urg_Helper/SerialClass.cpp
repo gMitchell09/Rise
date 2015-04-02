@@ -49,8 +49,9 @@ Timestamp_State:
 		char ts_c[sizeof(unsigned long)];
 		unsigned int curPos = 0;
 
-		while ((token = this->Pop()) != TYPE_TOKEN)
+		while (curPos < sizeof(unsigned long))
 		{
+			token = this->Pop();
 			if (token == EOF) 
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -65,29 +66,23 @@ Timestamp_State:
 		p.timestamp = *((unsigned long *)ts_c);
 
 Type_State:
-		while ((token = this->Pop()) != LENGTH_TOKEN)
+		while ((token = this->Pop()) == EOF)
 		{
-			if (token == EOF) 
-			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
-				continue;
-			}
-
-			// TODO: Fix this
-			if (token != (char)PacketTypes::kQuaternion &&
-				token != (char)PacketTypes::kTimeStamp) goto Start_State;
-			p.type = (PacketTypes)token;
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			continue;
 		}
+		// TODO: Fix this
+		if (token != (char)PacketTypes::kQuaternion &&
+			token != (char)PacketTypes::kTimeStamp) goto Start_State;
+		p.type = (PacketTypes)token;
 Length_State:
-		while ((token = this->Pop()) != DATA_TOKEN)
+		while ((token = this->Pop()) == EOF) 
 		{
-			if (token == EOF) 
-			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
-				continue;
-			}
-			p.length = token;
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			continue;
 		}
+		p.length = token;
+
 Data_State:
 		unsigned char length = p.length;
 		unsigned char* data = (unsigned char*)malloc(length);
@@ -211,6 +206,7 @@ void Serial::_init(LPCSTR portName)
 Serial::~Serial()
 {
     //Check if we are connected before trying to disconnect
+	_running = false;
     if(this->connected)
     {
         //We're no longer connected
@@ -218,7 +214,6 @@ Serial::~Serial()
         //Close the serial handler
         CloseHandle(this->hSerial);
     }
-	_running = false;
 }
 
 char Serial::Pop()

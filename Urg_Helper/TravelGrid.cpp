@@ -1,4 +1,5 @@
 #include "TravelGrid.h"
+#include <algorithm>
 
 const size_t TravelGrid::cell_size = 200; // 200mm
 
@@ -27,11 +28,11 @@ pcl::PointIndices::Ptr TravelGrid::points_in_range(float x_start, float x_end, f
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr filteredCloud (new pcl::PointCloud<pcl::PointXYZRGB>());
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr filteredCloud2 (new pcl::PointCloud<pcl::PointXYZRGB>());
 
-	pcl::PassThrough<pcl::PointXYZRGB> filter;
+	pcl::PassThrough<pcl::PointXYZRGB> filter(true);
 	filter.setInputCloud(this->cloud);
 	filter.setFilterFieldName("x");
 	filter.setFilterLimits(x_start, x_end);
-	filter.setNegative(false);
+	filter.setNegative(true);
 	filter.filter(*filteredCloud);
 
 	pcl::PointIndices::Ptr pi (new pcl::PointIndices());
@@ -44,18 +45,18 @@ pcl::PointIndices::Ptr TravelGrid::points_in_range(float x_start, float x_end, f
 	filter.setInputCloud(cloud);
 	filter.setFilterFieldName("y");
 	filter.setFilterLimits(y_start, y_end);
-	filter.setNegative(false);
+	filter.setNegative(true);
 	filter.filter(*filteredCloud2);
 
 	pcl::PointIndices::Ptr pi2 (new pcl::PointIndices());
 	filter.getRemovedIndices(*pi2);
 	ind2 = filter.getIndices();
 
-	pi->indices.insert(pi->indices.end(), pi2->indices.begin(), pi2->indices.end());
+	std::vector<int> inter_verts(pi->indices.size() + pi2->indices.size()); // meh, memory is cheap.
+	
+	std::set_intersection(pi->indices.begin(), pi->indices.end(), pi2->indices.begin(), pi2->indices.end(), inter_verts.begin());
 
-	std::cout << "Indices: " << ind->size() << std::endl;
-	std::cout << "Indices: " << ind2->size() << std::endl;
-
+	pi->indices = inter_verts;
 	
 	return pi;
 }

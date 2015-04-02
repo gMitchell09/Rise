@@ -8,11 +8,12 @@
 
 namespace Common
 {
-	IMU::IMU(std::shared_ptr<Serial> serial, bool syncRequired) :
+	IMU::IMU(std::shared_ptr<Serial> serial, bool syncRequired, bool noWrite) :
 		_isSendingQuatData(false), 
 		_running(true),
 		_waiting(syncRequired),
 		_syncRequired(syncRequired),
+		_noWrite(noWrite),
 		_imuSerial(serial), 
 		_queueLock(std::unique_ptr<std::mutex>(new std::mutex())),
 		_imuThread(std::bind(&IMU::readQuaternion, this))
@@ -43,7 +44,7 @@ namespace Common
 
 			if (!_isSendingQuatData)
 			{
-				_imuSerial->WriteData("1", 1);
+				if (!_noWrite) _imuSerial->WriteData("1", 1);
 				_isSendingQuatData = true;
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
@@ -67,22 +68,26 @@ namespace Common
 				assert(p.length == 4 * sizeof(float));
 			}
 
-			q.x = ((float*)p.data)[0];
-			q.y = ((float*)p.data)[1];
-			q.z = ((float*)p.data)[2];
-			q.w = ((float*)p.data)[3];
+			q.w = ((float*)p.data)[0];
+			q.x = ((float*)p.data)[1];
+			q.y = ((float*)p.data)[2];
+			q.z = ((float*)p.data)[3];
 
 			Quaternion_Time qt;
 			qt.q = q;
 			qt.timestamp = p.timestamp;
 
-			std::cout << "Roll: " << q.roll();
-			std::cout << " Pitch: " << q.pitch();
-			std::cout << " Yaw: " << q.yaw();
-			std::cout << std::endl;
-
 			_queueLock->lock();
-			_positionHistory.push(qt);
+			if (!_positionHistory.empty() && qt.timestamp < _positionHistory.back().timestamp)
+			{
+				Common::Quaternion_Time qt_tmp(_positionHistory.back());
+				_positionHistory.back() = qt;
+				_positionHistory.push(qt_tmp);
+			}
+			else
+			{
+				_positionHistory.push(qt);
+			}
 			_queueLock->unlock();
 		}
 
@@ -97,7 +102,7 @@ namespace Common
 
 		long timeout = 1000;
 
-		std::cout << _imuSerial->WriteData("T", 1) << std::endl;
+		if (!_noWrite) std::cout << _imuSerial->WriteData("T", 1) << std::endl;
 		Serial::Packet p;
 		while (p.type != Serial::PacketTypes::kTimeStamp && timeout > 0)
 		{

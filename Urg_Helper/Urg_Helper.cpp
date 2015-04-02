@@ -56,9 +56,13 @@ pcl::PointXYZRGB Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, Co
 
 	// First convert polar coordinates (r, theta coming straight from LIDAR)
 	pcl::PointXYZRGB lidarCart;
+	//lidarCart.x = 0;
+	//lidarCart.z = static_cast<float>(cos(theta) * radius);
+	//lidarCart.y = static_cast<float>(sin(theta) * radius);
+
 	lidarCart.x = 0;
-	lidarCart.z = static_cast<float>(cos(theta) * radius);
-	lidarCart.y = static_cast<float>(sin(theta) * radius);
+	lidarCart.y = static_cast<float>(cos(theta) * radius);
+	lidarCart.z = static_cast<float>(sin(theta) * radius);
 
 	// Rotate these values about the Z axis from the IMU yaw value
 	temp.x = static_cast<float>(lidarCart.x * cos(angle) + lidarCart.y * sin(angle));
@@ -121,12 +125,10 @@ bool Urg_Helper::GetScanFromUrg()
 
 	Common::Quaternion qt = _rotImu->findTimestamp(timestamp);
 	if (isnan(qt.x) || isnan(qt.y) || isnan(qt.z) || isnan(qt.w)) return false;
-	double rotation = qt.roll();
-	std::cout << "Roll: " << qt.roll();
-	std::cout << " Pitch: " << qt.pitch();
-	std::cout << " Yaw: " << qt.yaw();
-	std::cout << std::endl;
-
+	double rotation = qt.pitch();
+	/*std::cout << "Roll: " << qt.roll() << std::endl;
+	std::cout << "Pitch: " << qt.pitch() << std::endl;
+	std::cout << "Yaw: " << qt.yaw() << std::endl;*/
 
 	//Common::Quaternion pos = _posIMU->findTimestamp(timestamp);
 	//if (isnan(pos.x) || isnan(pos.y) || isnan(pos.z)) return false;
@@ -275,7 +277,13 @@ void Urg_Helper::keyPress (const pcl::visualization::KeyboardEvent &ev)
 		tg.setInputCloud(this->cloud);
 		
 		pcl::PointIndices::Ptr indices = tg.points_in_range(0, 1000, 0, 1000);
+
+		auto start = std::chrono::system_clock::now();
 		TravelGrid::Cell::CellTypes cellType = tg.classify_cell(indices);
+		auto duration = std::chrono::duration_cast<std::chrono::microseconds>
+			(std::chrono::system_clock::now() - start);
+
+		std::cout << "Duration: " << duration.count() << std::endl;
 
 		uint8_t r = 0;
 		uint8_t g = 0;

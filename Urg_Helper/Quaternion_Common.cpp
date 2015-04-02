@@ -18,7 +18,7 @@ namespace Common
 		w = 0;
 	}
 
-	Quaternion::Quaternion(float ax, float ay, float az, float aw)
+	Quaternion::Quaternion(float aw, float ax, float ay, float az)
 		: x(ax), y(ay), z(az), w(aw) {}
 
 	Quaternion::Quaternion(const Quaternion q1, const Quaternion q2, double interval)
