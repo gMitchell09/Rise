@@ -24,5 +24,7 @@ public:
 		Eigen::Vector3f axis);
 	static void FlattenCloud(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud3d, pcl::PointCloud<pcl::PointXYZRGBL>::Ptr grid2d, size_t cellWidth);
 	static std::vector<pcl::ModelCoefficients> UnorganizedPlaneDetection(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud);
+
+	static void VoxelGridFilter(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
 };
 

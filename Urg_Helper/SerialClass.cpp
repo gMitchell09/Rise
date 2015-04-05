@@ -4,14 +4,12 @@
 Serial::Serial() :
 	_running(true),
 	connected(false),
-	_packetLock(std::unique_ptr<std::mutex>(new std::mutex())),
 	_packetThread(std::bind(&Serial::_packetizeMeCapn, this))
 {}
 
 Serial::Serial(LPCSTR portName) :
 	_running(true),
 	connected(false),
-	_packetLock(std::unique_ptr<std::mutex>(new std::mutex())),
 	_packetThread(std::bind(&Serial::_packetizeMeCapn, this))
 {
     _init(portName);
@@ -20,7 +18,6 @@ Serial::Serial(LPCSTR portName) :
 Serial::Serial(std::string portName) :
 	_running(true),
 	connected(false),
-	_packetLock(std::unique_ptr<std::mutex>(new std::mutex())),
 	_packetThread(std::bind(&Serial::_packetizeMeCapn, this))
 
 {
@@ -40,8 +37,10 @@ void Serial::_packetizeMeCapn()
 		// FORGIVE ME.  STATE MACHINES <3 GOTO + LABELS
 
 Start_State:
+		if (!_running) return;
 		while ((token = this->Pop()) != START_TOKEN)
 		{
+			if (!_running) return;
 			if (token == EOF) std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 
@@ -51,6 +50,7 @@ Timestamp_State:
 
 		while (curPos < sizeof(unsigned long))
 		{
+			if (!_running) return;
 			token = this->Pop();
 			if (token == EOF) 
 			{
@@ -68,6 +68,7 @@ Timestamp_State:
 Type_State:
 		while ((token = this->Pop()) == EOF)
 		{
+			if (!_running) return;
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			continue;
 		}
@@ -78,6 +79,7 @@ Type_State:
 Length_State:
 		while ((token = this->Pop()) == EOF) 
 		{
+			if (!_running) return;
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			continue;
 		}
@@ -89,6 +91,7 @@ Data_State:
 		curPos = 0;
 		while (curPos < length)
 		{
+			if (!_running) return;
 			token = this->Pop();
 			if (token == EOF)
 			{
@@ -101,6 +104,7 @@ Data_State:
 		}
 		while ((token = this->Pop()) != END_TOKEN)
 		{
+			if (!_running) return;
 			if (token == EOF)
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -115,9 +119,12 @@ Data_State:
 		p.data = data;
 
 		// DONE
-		_packetLock->lock();
-		_packetMap[p.type].push(p);
-		_packetLock->unlock();
+		{
+			std::lock_guard<std::mutex> lk(_packetLock);
+			_packetMap[p.type].push(p);
+		}
+
+		if (!_running) return;
 	}
 }
 
@@ -207,6 +214,7 @@ Serial::~Serial()
 {
     //Check if we are connected before trying to disconnect
 	_running = false;
+	_packetThread.join();
     if(this->connected)
     {
         //We're no longer connected
@@ -348,12 +356,13 @@ Serial::Packet Serial::GetPacket(Serial::PacketTypes type)
 	Packet p;
 	if (_packetMap[type].empty()) return p;
 	
-	_packetLock->lock();
+	// Lock scope
+	{
+		std::lock_guard<std::mutex> lk(_packetLock);
 	
-	p = _packetMap[type].front();
-	_packetMap[type].pop();
-
-	_packetLock->unlock();
+		p = _packetMap[type].front();
+		_packetMap[type].pop();
+	}
 
 	return p;
 }

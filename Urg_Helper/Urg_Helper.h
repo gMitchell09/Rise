@@ -40,4 +40,7 @@ protected:
 	std::unique_ptr<std::mutex> _updateMutex;
 
 	std::unique_ptr<pcl::visualization::PCLVisualizer> _visualizer;
+
+private:
+	float _targetX, _targetY;
 };

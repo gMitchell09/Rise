@@ -37,7 +37,9 @@ Urg_Helper::Urg_Helper() :
 	cloud(new pcl::PointCloud <pcl::PointXYZRGB>()),
 	urg(std::unique_ptr<qrk::Urg_driver>(new qrk::Urg_driver())),
 	_updateMutex(std::unique_ptr<std::mutex> (new std::mutex()))
-{}
+{
+	_targetX = _targetY = 0;
+}
 
 //Decontructor that deletes the cloud closes the Lidar connection and deletes the object
 Urg_Helper::~Urg_Helper()
@@ -239,8 +241,8 @@ bool Urg_Helper::StartPCLVisualizer()
 
 void Urg_Helper::keyPress (const pcl::visualization::KeyboardEvent &ev)
 {
-	std::cout << "Key: " << ev.getKeySym() << " : " << ev.getKeyCode() << std::endl;
-	std::cout << "Mod: " << ev.isAltPressed() << ", " << ev.isCtrlPressed() << ", " << ev.isShiftPressed() << std::endl;
+	//std::cout << "Key: " << ev.getKeySym() << " : " << std::dec << (unsigned int)ev.getKeyCode() << std::endl;
+	//std::cout << "Mod: " << ev.isAltPressed() << ", " << ev.isCtrlPressed() << ", " << ev.isShiftPressed() << std::endl;
 
 	Eigen::Vector3f xAxis(1, 0, 0);
 	Eigen::Vector3f yAxis(0, 1, 0);
@@ -276,11 +278,11 @@ void Urg_Helper::keyPress (const pcl::visualization::KeyboardEvent &ev)
 		TravelGrid tg;
 		tg.setInputCloud(this->cloud);
 		
-		pcl::PointIndices::Ptr indices = tg.points_in_range(0, 1000, 0, 1000);
-
 		auto start = std::chrono::system_clock::now();
+		pcl::PointIndices::Ptr indices = tg.points_in_range(_targetX, _targetX + 1000, _targetY, _targetY + 1000);
+
 		TravelGrid::Cell::CellTypes cellType = tg.classify_cell(indices);
-		auto duration = std::chrono::duration_cast<std::chrono::microseconds>
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>
 			(std::chrono::system_clock::now() - start);
 
 		std::cout << "Duration: " << duration.count() << std::endl;
@@ -313,6 +315,33 @@ void Urg_Helper::keyPress (const pcl::visualization::KeyboardEvent &ev)
 			this->cloud->points[*itr].g = g;
 			this->cloud->points[*itr].b = b;
 		}
+	}
+	else if (ev.getKeySym() == "Left" && ev.keyDown())
+	{
+		_targetX -= 1000;
+
+		std::cout << "X: " << _targetX << ", Y: " << _targetY << std::endl; 
+	}
+	else if (ev.getKeySym() == "Right" && ev.keyDown())
+	{
+		_targetX += 1000;
+		std::cout << "X: " << _targetX << ", Y: " << _targetY << std::endl;
+	}
+	else if (ev.getKeySym() == "Up" && ev.keyDown())
+	{
+		_targetY += 1000;
+		std::cout << "X: " << _targetX << ", Y: " << _targetY << std::endl;
+	}
+	else if (ev.getKeySym() == "Down" && ev.keyDown())
+	{
+		_targetY -= 1000;
+		std::cout << "X: " << _targetX << ", Y: " << _targetY << std::endl;
+	}
+	else if (ev.getKeyCode() == 'v' && ev.keyDown())
+	{
+		std::cout << "Points before: " << this->cloud->points.size() << std::endl;
+		CloudMeshAdapter::VoxelGridFilter(this->cloud);
+		std::cout << "Points After: " << this->cloud->points.size() << std::endl;
 	}
 }
 

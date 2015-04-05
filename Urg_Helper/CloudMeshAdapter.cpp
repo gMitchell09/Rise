@@ -286,3 +286,16 @@ void CloudMeshAdapter::FlattenCloud(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr 
 	// profit.
 }
 
+void CloudMeshAdapter::VoxelGridFilter(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
+{
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_filt(new pcl::PointCloud<pcl::PointXYZRGB>());
+
+	pcl::VoxelGrid<pcl::PointXYZRGB> v;
+	v.setInputCloud(cloud);
+	v.setLeafSize(50, 50, 50);
+	v.filter(*cloud_filt);
+	std::cout << "Stupid check: " << cloud_filt->points.size() << std::endl;
+	cloud->swap(*cloud_filt);
+	std::cout << "Stupid check: " << cloud_filt->points.size() << std::endl;
+	std::cout << "Stupid check: " << cloud->points.size() << std::endl;
+}

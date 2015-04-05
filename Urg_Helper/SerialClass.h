@@ -33,9 +33,9 @@ public:
 		unsigned long timestamp;
 
 		// GO AHEAD AND LEAK YOU MOTHERFUCKING SON OF A BITCH
-		//~Packet() {
-		//	if (data != NULL) free(data);
-		//}
+		/*~Packet() {
+			if (data != NULL) free(data);
+		}*/
 
 		Packet() {
 			data = NULL;
@@ -75,7 +75,7 @@ protected:
 
 	std::atomic<bool> _running;
 	std::map<PacketTypes, std::queue<Packet>> _packetMap;
-	std::unique_ptr<std::mutex> _packetLock;
+	std::mutex _packetLock;
 	// MUST BE LAST IN LIST
 	std::thread _packetThread;
 
