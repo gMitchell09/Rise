@@ -294,8 +294,8 @@ void CloudMeshAdapter::VoxelGridFilter(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cl
 	v.setInputCloud(cloud);
 	v.setLeafSize(50, 50, 50);
 	v.filter(*cloud_filt);
-	std::cout << "Stupid check: " << cloud_filt->points.size() << std::endl;
 	cloud->swap(*cloud_filt);
-	std::cout << "Stupid check: " << cloud_filt->points.size() << std::endl;
-	std::cout << "Stupid check: " << cloud->points.size() << std::endl;
+
+	std::cout << "Points Removed: " << cloud_filt->points.size() - cloud->points.size() << std::endl;
+	std::cout << "% Removed: " << ((double)(cloud_filt->points.size() - cloud->points.size()))/cloud_filt->points.size() << std::endl;
 }

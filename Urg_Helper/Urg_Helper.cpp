@@ -49,7 +49,7 @@ Urg_Helper::~Urg_Helper()
 	this->urg->close();
 }
 //This function takes each point input and cnoverts it into a 3D point. using the scanNo from the URG a radius and the phi angle
-pcl::PointXYZRGB Urg_Helper::CreatePoint(int ScanNo, int radius, float angle, Common::PointXYZ roverPos)
+pcl::PointXYZRGB Urg_Helper::CreatePoint(int ScanNo, int radius, double angle, Common::PointXYZ roverPos)
 {
 	//Creates a pcl point object to store the 3D data.
 	pcl::PointXYZRGB temp;

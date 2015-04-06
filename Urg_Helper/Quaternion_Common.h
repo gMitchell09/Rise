@@ -19,7 +19,7 @@ namespace Common
 		static Quaternion Slerp(Quaternion q1, Quaternion q2, double t);
 		static Quaternion Lerp(Quaternion q1, Quaternion q2, double t);
 
-		static float dot(const Quaternion q1, const Quaternion q2);
+		static double dot(const Quaternion q1, const Quaternion q2);
 
 		PointXYZ GetPoint() const;
 
@@ -27,18 +27,18 @@ namespace Common
 		double pitch();
 		double yaw();
 
-		float length_sqr()
+		double length_sqr()
 		{
 			return x * x + y * y + z * z + w * w;
 		}
-		float length()
+		double length()
 		{
 			return sqrt(length_sqr());
 		}
 
 		Quaternion normalize()
 		{
-			float len = length();
+			double len = length();
 			if (len > 0.f && (len - 1.0f) > FLT_EPSILON)
 			{
 				len = 1.0f / len;
@@ -52,17 +52,17 @@ namespace Common
 			return q;
 		}
 
-		friend Quaternion operator*(const Quaternion &q, float f)
+		friend Quaternion operator*(const Quaternion &q, double f)
 		{
 			return Quaternion (f * q.x, f * q.y, f * q.z, f * q.w);
 		}
 	
-		friend Quaternion operator*(float f, const Quaternion &q)
+		friend Quaternion operator*(double f, const Quaternion &q)
 		{
 			return Quaternion (f * q.x, f * q.y, f * q.z, f * q.w);
 		}
 
-		friend Quaternion operator/(const Quaternion &q, float f)
+		friend Quaternion operator/(const Quaternion &q, double f)
 		{
 			return Quaternion (q.x / f, q.y / f, q.z / f, q.w / f);
 		}

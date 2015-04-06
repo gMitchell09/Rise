@@ -95,6 +95,22 @@ TravelGrid::Cell::CellTypes TravelGrid::classify_cell(pcl::PointIndices::Ptr ind
 		if (point.z > max) max = point.z;
 	}
 
+	unsigned long wall_cnt = 0;
+	unsigned long stair_cnt = 0;
+
+	for (auto itr = indices->indices.begin(); itr != indices->indices.end(); ++itr)
+	{
+		pcl::PointXYZRGB point = this->cloud->points[*itr];
+		if (point.z < 0.8 * max && point.z > 0.8 * min) wall_cnt++;
+		if (point.z < 0.0 - TravelGrid::RoverHeight) stair_cnt++;
+	}
+
+	if (stair_cnt > 20) x = TravelGrid::Cell::CellTypes::kStairs;
+	if (wall_cnt > 20) x = TravelGrid::Cell::CellTypes::kWall;
+
+	std::cout << "Stair count: " << stair_cnt << std::endl;
+	std::cout << "Wall count: " << wall_cnt << std::endl;
+
 	std::cout << std::endl;;
 	std::cout << "Mean: " << mean << std::endl << "Std Dev: " << stddev << std::endl;
 	std::cout << "Min: " << min << std::endl << "Max: " << max << std::endl << "Median: " << (max - min)/2.0 << std::endl;

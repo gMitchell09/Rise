@@ -55,4 +55,5 @@ private:
 	std::unique_ptr<std::mutex> _mapLock;
 
 	static const unsigned int MinIndices = 1000;
+	static const unsigned long RoverHeight = 1000;
 };

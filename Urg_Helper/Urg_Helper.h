@@ -29,7 +29,7 @@ public:
 
 protected:
 	pcl::PointCloud <pcl::PointXYZRGB>::Ptr cloud;
-	pcl::PointXYZRGB CreatePoint(int ScanNo, int radius, float angle, Common::PointXYZ roverPos);
+	pcl::PointXYZRGB CreatePoint(int ScanNo, int radius, double angle, Common::PointXYZ roverPos);
 	
 	std::unique_ptr<qrk::Urg_driver> urg;
 
