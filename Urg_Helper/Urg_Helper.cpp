@@ -26,7 +26,7 @@
 #include <pcl/common/common_headers.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/ply_io.h>
-
+#include <vtkRenderWindow.h>
 #include <boost/interprocess/mapped_region.hpp>
 
 #define ABS(x) ((x < 0) ? (-x) : (x))
