@@ -14,7 +14,7 @@ namespace Common
 		Quaternion();
 		Quaternion(PointXYZ p);
 		Quaternion(float ax, float ay, float az, float aw);
-		Quaternion(const Quaternion q1, const Quaternion q2, double t = 0.5);
+		Quaternion(const Quaternion q1, const Quaternion q2, double t = 0.5, bool normalize = false);
 
 		static Quaternion Slerp(Quaternion q1, Quaternion q2, double t);
 		static Quaternion Lerp(Quaternion q1, Quaternion q2, double t);

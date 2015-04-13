@@ -21,10 +21,18 @@ namespace Common
 	Quaternion::Quaternion(float aw, float ax, float ay, float az)
 		: x(ax), y(ay), z(az), w(aw) {}
 
-	Quaternion::Quaternion(const Quaternion q1, const Quaternion q2, double interval)
+	Quaternion::Quaternion(const Quaternion q1, const Quaternion q2, double interval, bool position)
 	{
-		Quaternion tmp = Quaternion::Slerp(q1, q2, interval);
-		x = tmp.x; y = tmp.y; z = tmp.z; w = tmp.w;
+		if (!position)
+		{
+			Quaternion tmp = Quaternion::Slerp(q1, q2, interval);
+			x = tmp.x; y = tmp.y; z = tmp.z; w = tmp.w;
+		}
+		else
+		{
+			Quaternion q = (q1 + interval * (q2 - q1));
+			x = q.x; y = q.y; z = q.z; w = q.z;
+		}
 	}
 
 	double Quaternion::dot(const Quaternion q1, const Quaternion q2)

@@ -9,6 +9,8 @@ from array import array
 import struct
 import sys
 import os
+import warnings
+import logging
 
 # line drawing stuffs
 import bgl, blf
@@ -34,7 +36,7 @@ def ShootRay(start, end, center):
     lineColor = [0, 0, 1.0, 1.0]
     drawLine(center, end, lineColor)
     col, obj, mat, loc, norm = bpy.data.scenes[0].ray_cast(center, end)
-#    print ("Start: ", VectorMtF(center), "End: ", VectorMtF(end))
+    #print ("Start: ", VectorMtF(center), "\nEnd: ", VectorMtF(end))
 #    if (col):
 #        print ("Object: ", obj)
 #        print ("Loc: ", VectorMtF(loc))
@@ -49,19 +51,33 @@ def ScanOnce(object, mesh):
         #print ("Object Center: ", VectorMtF(object.location))
         #print ("Face Center: ", VectorMtF(face.center + object.location))
         #maybe we need to xform into scene coordinates and then world?
-        faceCenter = face.center + object.location
+        faceCenter = face.center + getActualLocation(object)# + VectorFtM(Vector([0, 0, 2.25]))
         # so our ray doesn't hit the face we are emitting the ray from, float variance
         faceOffset = 0.001 * face.normal
-        obj, a, b = ShootRay(object.location, faceCenter + face.normal * float(30.0 * M_TO_FT), faceCenter + faceOffset);
+        
+        #print ("Ray: ", getActualLocation(object))
+        #print ("Normal: ", face.normal)
+        #print ("Normal Ext: ", (face.normal * float(30.0)) * M_TO_FT)
+        #print ("End: ", (faceCenter + face.normal * float(30.0)) * M_TO_FT)
+        #print ("Offset: ", faceCenter + faceOffset)
+
+        obj, a, b = ShootRay(getActualLocation(object), faceCenter + face.normal * float(30.0), faceCenter + faceOffset);
         if (a):
             distData.append(b * 1000) # result in mm
             #print ("B: ", str(b * M_TO_FT))
-
+        else: 
+            print("No collision?")
+            
         if (obj == object):
             print ("B: ", str(b * M_TO_FT))
             print ("Oh shit.")
             
     return distData
+
+def getActualLocation(obj):
+    if (obj == None): return Vector([0.0, 0.0, 0.0])
+    return obj.matrix_world.to_translation()
+    #return obj.location + getActualLocation(obj.parent)
 
 def getFaceAngles(mesh):
     angleData = [atan2(face.normal.z, face.normal.y) for face in mesh.polygons]
@@ -75,7 +91,7 @@ def rotateLidar(object, angle):
     #object.location.x += 0.001
     
     object.select = True
-    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
     
 def correctLidarRotation(lidar, ref):
     print("Correcting rotation")
@@ -87,19 +103,12 @@ def correctLidarRotation(lidar, ref):
 
     lidar.rotation_euler = ori
     lidar.select = True
-    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 
 def oglWrapper(func):
     def func_wrapper():
-        bgl.glEnable(bgl.GL_BLEND)
-        bgl.glColor4f(0.0, 0.0, 0.0, 0.5)
-        bgl.glLineWidth(2)
-        
+        logging.getLogger().setLevel(0)
         func()
-                
-        bgl.glLineWidth(1)
-        bgl.glDisable(bgl.GL_BLEND)
-        bgl.glColor4f(0.0, 0.0, 0.0, 1.0)    
     
     return func_wrapper
 
@@ -114,7 +123,7 @@ def createUniqueFile(name, ext):
             break
         except:
             failedFiles += 1
-            print ("Error: ", sys.exc_info()[0])
+            print ("Error: ", sys.exc_info()[0], file = sys.stderr)
             continue
     return outFile
 
@@ -146,16 +155,30 @@ def removeTempObjects(scene):
 def moveRover(rover, distance):
     # assuming the rover is constrained to a path, we can move on any axis.
     rover.location.x += distance/3
-    rover.location.y += distance/3
-    rover.location.z += distance/3
-    rover.select = True
-    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    #rover.location.y += distance/3
+    #rover.location.z += distance/3
+    #rover.select = True
+    #bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
     
 def getObjectInLayer(name, layer):
     return [obj for obj in bpy.data.objects if obj.name.find(name) != -1 and obj.layers[layer] == True][0]
     
+    
+import sys
+glob_stdout = sys.stdout
+
+class NullDevice(): 
+    def write(self, s):
+        if not s.startswith("Warning"):
+            glob_stdout.write(s)
+
+class NoPrint(): 
+    def write(self, s): pass
+
 @oglWrapper
 def main():
+    sys.stderr = NoPrint()
+    sys.stdout = NullDevice()
     
     # objects needed:
     #  - Lidar_Scan_Object + Mesh
@@ -184,10 +207,11 @@ def main():
     roverPath = getObjectInLayer("RoverPath", 0) #bpy.data.objects["RoverPath"]
     roverBase = getObjectInLayer("Rover_Base", 0) #bpy.data.objects["Rover_Base_tmp"]
     
-    #roverBase.constraints.new(type="CLAMP_TO")
-    #roverBase.constraints["Clamp To"].target = roverPath
-    #roverBase.constraints["Clamp To"].use_cyclic = True
-    
+    '''if ('Clamp To' not in roverBase.constraints):
+        const = roverBase.constraints.new(type="CLAMP_TO")
+        const.target = roverPath
+        const.use_cyclic = True
+    '''
     # /////////////////////////////////////////
     imu_file = createUniqueFile("imu", ".txt")
     lidar_file = createUniqueFile("lidar", ".txt")
@@ -205,13 +229,13 @@ def main():
     time_between_imu_readings = 5
     time_between_lidar_readings = 25
     
-    rover_speed = 0.3 # mm/msec
+    rover_speed = 3.0/100.0
     
     time_of_last_imu_read = -1
     time_of_last_imu_pos_read = -1
     time_of_last_lidar_read = -1
     
-    imu_pos_start = imuPos.location
+    imu_pos_start = getActualLocation(imuPos)
 
     # scan time = 25ms
     # rotation speed = 120RPM
@@ -219,49 +243,49 @@ def main():
     #                = 4 * pi rad/s
     #                = 18 d/iter
     #                = 0.15707963267948966192313216916398 rad/iter
-    lidar_spin_speed = 0.01256637061435917295385057353312 # rad/ms
+    lidar_spin_speed = 15 * 0.01256637061435917295385057353312 # rad/ms
 
-    while (timestamp < 2000):
+    while (timestamp < 30000):
         prev_timestamp = timestamp
         timestamp = timestamp + 1 #current_milli_time() - startTime
         
         if (timestamp - time_of_last_lidar_read > time_between_lidar_readings):
             dist_data = ScanOnce(object, mesh)
             longArray = array('L', [int(x) for x in dist_data])
+            #print ("# Collisions: ", len(dist_data))
             lidar_file_string += timestamp.to_bytes(4, sys.byteorder) + longArray.tobytes() + b'\0\0\0\0'
             #lidar_file_string += '~' + str(timestamp) + 'D' + ','.join(str(x) for x in dist_data) + 'E'
             time_of_last_lidar_read = timestamp
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
             
         if (timestamp - time_of_last_imu_read > time_between_imu_readings):
             quat = imuRot.matrix_world.to_quaternion()
-            print ("Rot: ", imuRot.matrix_world.to_euler('XYZ'))
+#            print ("Rot: ", imuRot.matrix_world.to_euler('XYZ'))
             floatArray = array('f', [quat.w, quat.x, quat.y, quat.z])
+            #print ("Time: ", timestamp)
             imu_file_string += bytes('S', 'UTF-8') \
              + struct.pack('L', timestamp) \
-             + bytes('TqL', 'UTF-8') \
+             + bytes('q', 'UTF-8') \
              + struct.pack('b', len(floatArray) * 4) \
-             + bytes('D', 'UTF-8') \
              + floatArray.tobytes() \
              + bytes('E', 'UTF-8')
             time_of_last_imu_read = timestamp
             
         if (timestamp - time_of_last_imu_pos_read > time_between_imu_readings):
-            quat = imu_pos_start - imuPos.location
+            quat = 1000 * (imu_pos_start - getActualLocation(imuPos))
             #print ("Pos: ", imuPos.location)
             floatArray = array('f', [0, quat.x, quat.y, quat.z])
             imu_pos_file_string += bytes('S', 'UTF-8') \
              + struct.pack('L', timestamp) \
-             + bytes('TqL', 'UTF-8') \
+             + bytes('q', 'UTF-8') \
              + struct.pack('b', len(floatArray) * 4) \
-             + bytes('D', 'UTF-8') \
              + floatArray.tobytes() \
              + bytes('E', 'UTF-8')
             time_of_last_imu_pos_read = timestamp
             
         rotateLidar(object, lidar_spin_speed * (timestamp - prev_timestamp))
-        #moveRover(roverBase, rover_speed * (timestamp - prev_timestamp))
-        #print ("Position: ", imuPos.location)
-        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+        moveRover(roverBase, rover_speed * (timestamp - prev_timestamp))
+        #print ("Position: ", imuPos.parent.location)
             
         #print("Time: ", timestamp)
         #print ("Q: ", imuObj.matrix_world.to_quaternion())
@@ -277,10 +301,10 @@ def main():
     angleArray = array('f', angleData)
     lidar_file.write(angleArray)
     lidar_file.write(bytes('\x00\x00\x00\x00', 'UTF-8'))
-    
+    print ("Len: ", len(lidar_file_string))
     lidar_file.write(lidar_file_string)
     
-    imu_timestamp_string = bytes('S\x00\x00\x00\x00TtL\x04D\x00\x00\x00\x00E', 'UTF-8')
+    imu_timestamp_string = bytes('S\x00\x00\x00\x00t\x04\x00\x00\x00\x00E', 'UTF-8')
     imu_file.write(imu_timestamp_string)
     imu_file.write(imu_file_string)
     imu_pos_file.write(imu_pos_file_string)

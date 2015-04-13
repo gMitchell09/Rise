@@ -75,6 +75,8 @@ pcl::PointXYZRGB Urg_Helper::CreatePoint(int ScanNo, int radius, double angle, C
 	temp.y += roverPos.y;
 	temp.z += roverPos.z;
 
+	//std::cout << "Rover pos: " << roverPos.x << ", " << roverPos.y << ", " << roverPos.z << std::endl;
+
 	temp.r = 255;
 	temp.g = 255;
 	temp.b = 255;
@@ -132,10 +134,8 @@ bool Urg_Helper::GetScanFromUrg()
 	std::cout << "Pitch: " << qt.pitch() << std::endl;
 	std::cout << "Yaw: " << qt.yaw() << std::endl;*/
 
-	//Common::Quaternion pos = _posIMU->findTimestamp(timestamp);
-	//if (isnan(pos.x) || isnan(pos.y) || isnan(pos.z)) return false;
-
-	Common::Quaternion pos = Common::Quaternion(0, 0, 0, 0);
+	Common::Quaternion pos = _posIMU->findTimestamp(timestamp);
+	if (isnan(pos.x) || isnan(pos.y) || isnan(pos.z)) return false;
 
 	for (int i = 0; i < data.size(); i++)
 	{

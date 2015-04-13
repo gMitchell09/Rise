@@ -167,7 +167,16 @@ namespace Common
 		if (isValid) 
 		{
 			std::cout << "Slerp!" << std::endl;
-			return Quaternion(qt_prev.q, qt_post.q, float(timestamp - qt_prev.timestamp) / float(qt_post.timestamp));
+			Quaternion q(qt_prev.q, qt_post.q, float(timestamp - qt_prev.timestamp) / float(qt_post.timestamp), _syncRequired);
+			
+			if (!_syncRequired)
+			{
+				//std::cout << "Point: " << qt_prev.q.x << ", " << qt_prev.q.y << ", " << qt_prev.q.z << std::endl;
+				//std::cout << "Interpolated: " << q.x << ", " << q.y << ", " << q.z << std::endl;
+				return qt_prev.q;
+			}
+
+			return q;
 		}
 
 		else return Quaternion();
