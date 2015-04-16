@@ -77,9 +77,12 @@ pcl::PointXYZRGB Urg_Helper::CreatePoint(int ScanNo, int radius, double angle, C
 
 	//std::cout << "Rover pos: " << roverPos.x << ", " << roverPos.y << ", " << roverPos.z << std::endl;
 
-	temp.r = 255;
-	temp.g = 255;
-	temp.b = 255;
+	// -1000 - 4000
+	// (n + 1000)/5000 * 255
+
+	temp.r = (unsigned char) (((temp.z + 1000.0) / 2000.0) * 255.0);
+	temp.g = 128;
+	temp.b = 0;
 
 	return temp;
 }
